@@ -1,0 +1,12 @@
+{
+  "aliases": [
+    {
+      "moduleName": "tbgtee",
+      "url": "tbgtee-v1"
+    },
+    {
+      "moduleName": "tbiplc",
+      "url": "tbiplc-v1"
+    }
+  ]
+}

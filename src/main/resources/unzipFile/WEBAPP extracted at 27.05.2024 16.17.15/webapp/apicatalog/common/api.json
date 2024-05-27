@@ -1,0 +1,11 @@
+{
+    "moduleDefaults": {
+        "protocol": "https",
+        "host": "trade-banca-svil.syssede.systest.sanpaoloimi.com",
+        "baseUrl": "/",
+        "security": "none"
+    },
+    "apis" : {
+
+    }
+}
