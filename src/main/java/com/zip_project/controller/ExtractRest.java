@@ -10,40 +10,40 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zip_project.service.UnzipFile;
+import com.zip_project.service.ExtractFile;
 
 @RestController
-@RequestMapping("/unzip")
+@RequestMapping("/extract")
 @ResponseStatus(HttpStatus.OK)
-public class UnzipRest {
+public class ExtractRest {
 
 	@GetMapping("/test")
-	public String unzipFileTest() {
-		return "Unzip file test";
+	public String extractFileTest() {
+		return "extract file test";
 	}
 
 	@GetMapping("/local")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String unzipFile() {
+	public String extractFile() {
 		try {
-			UnzipFile.unzipFileManager(null);
+			ExtractFile.extractFileManager(null);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return e.getLocalizedMessage() + " \n " + e.getMessage();
 			
 		}
-		return "FILE UNZIPPED";
+		return "FILE EXTRACTED";
 	}
 
 	@PostMapping("/param")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String unzipFile(File file) {
+	public String extractFile(File file) {
 		try {
-			UnzipFile.unzipFileManager(file);
+			ExtractFile.extractFileManager(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return e.getLocalizedMessage() + " \n " + e.getMessage();
 		}
-		return "FILE UNZIPPED";
+		return "FILE EXTRACTED";
 	}
 }

@@ -23,16 +23,16 @@ import com.zip_project.service.word.WordGenerator;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class UnzipFile {
+public class ExtractFile {
 
-	private UnzipFile() {
+	private ExtractFile() {
 	}
 
 	private static final String DESTINATION_FOLDER = "C:/sviluppo/java_workspaces/Jersey/ZipProject/src/main/resources/unzipFile/";
 	private static final String SOURCE_FOLDER = "C:/sviluppo/java_workspaces/Jersey/ZipProject/src/main/resources/zipFile/webapp.zip";
 	private static final String DOCUMENT_NAME = "WEBAPP";
 
-	public static void unzipFileManager(File paramFile) throws IOException {
+	public static void extractFileManager(File paramFile) throws IOException {
 		byte[] zipStreamBuffer = new byte[1024];
 		XWPFDocument document;
 		Integer counterNum = 0;
@@ -94,6 +94,8 @@ public class UnzipFile {
 				zipEntry = zis.getNextEntry();
 				counterNum++;
 			}
+			
+			// Finalize report word document
 			WordGenerator.documentWrite(document, resourcePath, DOCUMENT_NAME);
 		} catch (IOException e) {
 			log.error("Error while extracting file: " + e.getMessage());
@@ -101,6 +103,7 @@ public class UnzipFile {
 		}
 	}
 
+	// Generate unique name with date + time tag
 	private static String generateTagName() {
 		LocalDateTime dataOdierna = LocalDateTime.now();
 		String pattern = "dd/MM/yyyy HH:mm:ss";

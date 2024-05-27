@@ -27,7 +27,6 @@ public class WordGenerator {
 			title = document.createParagraph();
 			title.setAlignment(ParagraphAlignment.CENTER);
 
-			// setting title style and text
 			XWPFRun titleRun = title.createRun();
 			titleRun.setBold(true);
 			titleRun.setFontFamily(FONT_FAMILY);
@@ -47,7 +46,6 @@ public class WordGenerator {
 		FileOutputStream out = null;
 		String nameFile = "/" + fileName.toLowerCase() + " report.docx";
 
-		// finalize the word report
 		try {
 			out = new FileOutputStream(destDir.toString() + nameFile);
 			document.write(out);
@@ -91,11 +89,13 @@ public class WordGenerator {
 		for (String attribute : fileAttributes) {
 			singleFileRun = singleFileParagraph.createRun();
 			if (counter == 0) {
+				// File attribute name
 				singleFileRun.setBold(true);
 				singleFileRun.setFontFamily(FONT_FAMILY);
 				singleFileRun.setText(attribute);
 				counter++;
 			} else {
+				// File attribute data
 				singleFileRun.setBold(false);
 				singleFileRun.setFontFamily(FONT_FAMILY);
 				singleFileRun.setText(attribute);
