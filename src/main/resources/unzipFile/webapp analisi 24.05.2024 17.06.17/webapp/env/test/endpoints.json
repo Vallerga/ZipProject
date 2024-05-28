@@ -1,7 +1,0 @@
-{
-  "authorize": "https://trade-banca-test.syssede.systest.sanpaoloimi.com/auth/oauth/v2/authorize",
-  "consent": "https://trade-banca-test.syssede.systest.sanpaoloimi.com/auth/oauth/v2/authorize/consent",
-  "checkCookie" : "https://trade-banca-test.syssede.systest.sanpaoloimi.com/api/sec/internal/cookie",
-  "redirectUri": "https://trade-banca-test.syssede.systest.sanpaoloimi.com/trade-banca/webapp/redirect/index.html",
-  "stateUrl": "https://trade-banca-test.syssede.systest.sanpaoloimi.com/trade-banca/webapp/"
-}

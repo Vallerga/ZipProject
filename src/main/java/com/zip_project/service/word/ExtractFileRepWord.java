@@ -1,4 +1,4 @@
-package com.zip_project.service;
+package com.zip_project.service.word;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,9 +23,9 @@ import com.zip_project.service.word.WordGenerator;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ExtractFile {
+public class ExtractFileRepWord {
 
-	private ExtractFile() {
+	private ExtractFileRepWord() {
 	}
 
 	private static final String DESTINATION_FOLDER = "C:/sviluppo/java_workspaces/Jersey/unzipFile/";

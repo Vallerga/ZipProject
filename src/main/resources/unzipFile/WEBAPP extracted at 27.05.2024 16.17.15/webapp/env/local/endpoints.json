@@ -1,5 +1,0 @@
-{
-  "authorize": "/trade-banca/webapp/createSession",
-  "stateUrl": "/trade-banca/webapp/?realLogin=false",
-  "createSession": "/api/trade-banca/s0tb0/sessionmanager/v1/session"
-}

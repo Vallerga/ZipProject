@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zip_project.service.ExtractFile;
+import com.zip_project.service.word.ExtractFileRepWord;
 
 @RestController
 @RequestMapping("/extract")
@@ -22,11 +23,11 @@ public class ExtractRest {
 		return "extract file test";
 	}
 
-	@GetMapping("/local")
+	@GetMapping("/word/local")
 	@ResponseStatus(HttpStatus.CREATED)
 	public String extractFile() {
 		try {
-			ExtractFile.extractFileManager(null);
+			ExtractFileRepWord.extractFileManager(null);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return e.getLocalizedMessage() + " \n " + e.getMessage();
@@ -35,11 +36,11 @@ public class ExtractRest {
 		return "FILE EXTRACTED";
 	}
 
-	@PostMapping("/param")
+	@PostMapping("/word/param")
 	@ResponseStatus(HttpStatus.CREATED)
 	public String extractFile(File file) {
 		try {
-			ExtractFile.extractFileManager(file);
+			ExtractFileRepWord.extractFileManager(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return e.getLocalizedMessage() + " \n " + e.getMessage();
