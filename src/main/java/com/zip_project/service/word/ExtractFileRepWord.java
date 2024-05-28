@@ -18,8 +18,6 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
-import com.zip_project.service.word.WordGenerator;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -94,7 +92,7 @@ public class ExtractFileRepWord {
 				zipEntry = zis.getNextEntry();
 				counterNum++;
 			}
-			
+
 			// Finalize report word document
 			WordGenerator.documentWrite(document, resourcePath, DOCUMENT_NAME);
 		} catch (IOException e) {
