@@ -4,14 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.zip_project.service.ExtractFile;
 import com.zip_project.service.word.ExtractFileRepWord;
 
@@ -20,9 +21,12 @@ import com.zip_project.service.word.ExtractFileRepWord;
 @ResponseStatus(HttpStatus.OK)
 public class ExtractRest {
 
+	@Autowired
+	ExtractFile ef;
+
 	@GetMapping("/test")
 	public String extractFileTest() {
-		return "extract file test";
+		return "test connection";
 	}
 
 	@GetMapping("/word/local")
@@ -52,15 +56,14 @@ public class ExtractRest {
 
 	@GetMapping("/local")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String extractFile(@RequestParam List<String> test) {
+	public String extractFile() {
 
 		try {
-			List<List<String>> extractFileManager = ExtractFile
-					.extractFileManager(null, test);
+			List<JsonNode> extractFileManager = ef.extractFileManager(null);
 
 			System.out.println(
 					"extractFileManager syze: " + extractFileManager.size());
-			System.out.println("extractFileManager: " + extractFileManager);
+			// System.out.println("extractFileManager: " + extractFileManager);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -72,15 +75,14 @@ public class ExtractRest {
 
 	@PostMapping("/param")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String extractFile(File file, @RequestParam List<String> test) {
+	public String extractFile(File file) {
 
 		try {
-			List<List<String>> extractFileManager = ExtractFile
-					.extractFileManager(file, test);
+			List<JsonNode> extractFileManager = ef.extractFileManager(file);
 
 			System.out.println(
 					"extractFileManager syze: " + extractFileManager.size());
-			System.out.println("extractFileManager: " + extractFileManager);
+			// System.out.println("extractFileManager: " + extractFileManager);
 
 		} catch (IOException e) {
 			e.printStackTrace();
