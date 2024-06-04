@@ -1,0 +1,581 @@
+{
+  "moduleDefaults": {
+    "protocol": "https",
+    "host": "trade-banca-svil.syssede.systest.sanpaoloimi.com",
+    "baseUrl": "/",
+    "security": "none"
+  },
+  "apis": {
+    "prodotti-generic": [
+      {
+        "isMocked": false,
+        "name": "getListaPratiche",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/pratica/lista/:codProdotto/:idTab",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getCountBanca",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/pratica/count/:codProdotto/:idTab",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingTabBanca",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/tab/banca",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingStatiPratica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/statipratica",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getAnagrafica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/anagrafica/:codSocieta/:ndgUtente",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "registra",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/prodotti/pratica/controlli/registra",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "getControlli",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/prodotti/pratica/controlli/:tipo/:id/:versione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "checkBic",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/check/controllobic/:bic/:codAbi/:userId/:userUo/:codSocieta",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "scambioChiavi",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/check/scambiochiavi/:bic",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getEmbargo",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/embargo/:iso",
+        "method": "get"
+      },
+      {
+        "isMocked": true,
+        "name": "checkBancheBloccate",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/check/banchebloccate/:bic/:clone",
+        "method": "get"
+      },
+      {
+        "isMocked": true,
+        "name": "getBlacklistRicercaWithList",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/blc01/ricerca",
+        "method": "post"
+      },
+      {
+        "isMocked": true,
+        "name": "blacklistSalvaRicercaWithList",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/blc01/salvalistaricerca",
+        "method": "post"
+      },
+      {
+        "isMocked": true,
+        "name": "stampaBlacklistElencoDinamico",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/blc01/stampaBlacklistElencoDinamico",
+        "method": "post"
+      },
+      {
+        "isMocked": true,
+        "name": "dettaglioBLC",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/blc/dettaglio/id/:id/lista/:type",
+        "method": "get"
+      },
+      {
+        "isMocked": true,
+        "name": "salvadettaglio",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/blc/salvadettaglio/:uuid/:type",
+        "method": "post"
+      },
+      {
+        "isMocked": true,
+        "name": "stampadettaglio",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/blc/stampadettaglio/:uuid/:type",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "cambioOwnershipPratica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/prodotti/pratica/cambioOwnershipPratica/:tipo/:id/:versione",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "condizioniByIdPotenziale",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/prodotti/pratica/condizioniByIdPotenziale",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "matricolaSpunta",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/pratica/matricolaspunta/:tipo/:id/:versione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "firma",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/firma/:tipo/:id/:versione",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "documentiDaFirmare",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/firma/elenco/:tipo/:id/:versione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getRubrica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/bank/rubrica",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "accreditocommissioni",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/conti/accreditocommissioni/:nsg/:codSocieta",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "comunicazioniDaFirmare",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/firma/comunicazioni/elenco/:tipo/:id/:versione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "firmaComunicazioni",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/firma/comunicazioni/:tipo/:id/:versione",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "cancellaComunicazioni",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/firma/comunicazioni/cancella/:tipo/:id/:versione",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "getDettaglioDisposizione",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/prodotti/disposizioni/:tipo/:id/:versione/:idDisposizione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "workflowDisposizione",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/prodotti/disposizioni/workflow/:tipo/:id/:versione/:idDisposizione",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "getEmbarghiModel",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/embarghi/:tipo/:id/:versione",
+        "method": "get",
+        "hideSpinner": true
+      }
+    ],
+    "pratica": [
+      {
+        "isMocked": false,
+        "name": "getPratica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/pratica/:tipo/:id/:versione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getPraticaStorico",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/pratica/storico/:tipo/:id/:versione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "salvaPratica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/pratica/salva",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "getCondizioniDerogate",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/pratica/inquiryCondEconomicheDerogabili/:tipo/:id/:versione/:codAbi/:codUnitaOperativa/:idPropostaPrice",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "listaCondizioniCQ",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/contrattoQuadro/caricaCondEconomiche/:tipo/:id/:versione/:conto",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "aggiornaCondEconomicheDerogabili",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/pratica/aggiornaCondEconomicheDerogabili/:tipo/:id/:versione",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "caricaCondEconomicheDerogabili",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/pratica/caricaCondEconomicheDerogabili/:tipo/:id/:versione/:conto",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "printAnteprima",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/print/:tipo/:id/:versione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "checkFidoRico",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/pratica/checkFidoRico/:tipo/:idPratica/:versione/:codUnitaOperativa/:codAbi/:keyOldEE/:nsgFido/:numFido/:progFido",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "insertCharges",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/pratica/inserimentoCharges/:tipo/:id/:versione",
+        "method": "post"
+      }
+    ],
+    "prodotti-mapping": [
+      {
+        "isMocked": false,
+        "name": "getMappingModalitaEmissione",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/modalitaemissione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingTipoAllegato",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/tipoallegato",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingCountries",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/paesi",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingTipoDisposizione",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/tipodisposizione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingStatiDisposizione",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/statidisposizione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingTipoControllo",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/tipocontrollo",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingEsitoControllo",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/esitocontrollo",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingTipologieGaranzia",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/tipologiagaranzia",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingScopoMessaggio",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/scopoMessaggio",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingScopoMessaggioModifica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/scopoMessaggioModifica",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingDivise",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/divise",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingRegoleApplicabili",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/regoleApplicabiliSwift2020",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingTipoScadenza",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/tipoScadenza",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingStatiComunicazione",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/staticomunicazione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingTipologiaComunicazione",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/tipologiacomunicazione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingBancheCliente",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banche",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingPeriodoProrogaAutomatica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/periodoProrogaAutomatica",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingPagamentiMultipliParziali",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/pagamentiMultipliParziali",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getFidiUrl",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/core/fidi/url/:abi/:nsg",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingAutGestore",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/autgestore",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingCanaleConsegna",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/canaleConsegna",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingSoggettoConsegna",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/soggettoConsegna",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingValutazioneTesto",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/valutazionetesto",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingModalitaConsegna",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/modalitaConsegna",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingIstruzioniDiConferma",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/istruzioniConferma",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingFiloni",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/filoni",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingTipoGaranziaLocal",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/tipogaranzialocal",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingTipoImpegnoLocal",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/tipoimpegnolocal",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingListaGestori",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/listagestori",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getMappingLanguages",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/languages",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getBankChargesCode",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/bankChargesCode",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getDettaglioCharges",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/common/mapping/dettaglioCharges",
+        "method": "get"
+      }
+    ],
+    "workflow": [
+      {
+        "isMocked": false,
+        "name": "workflowPratica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/workflow/:tipo/:id/:versione",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "workflowPraticaEvent",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/workflow/event/:tipo/:id/:versione",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "trasferisci",
+        "baseUrl": "/api/trade-banca/s0tb0/tbgtee/v1",
+        "endpoint": "/banca/garint/workflow/trasferisci/:tipo/:id/:versione",
+        "method": "post"
+      }
+    ],
+    "allegati": [
+      {
+        "isMocked": false,
+        "name": "getAllegato",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/garint/document/download/:documentumId",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "getAllegatiPratica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/garint/document/allegati/:tipo/:id/:versione",
+        "method": "get"
+      },
+      {
+        "isMocked": false,
+        "name": "uploadAllegato",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/garint/document/upload",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "uploadAllegatiPratica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/garint/document/pratica/allegati/upload",
+        "method": "post"
+      },
+      {
+        "isMocked": false,
+        "name": "salvaComunicazioniAllegatiPratica",
+        "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+        "endpoint": "/banca/garint/comunicazioni/salva/:tipo/:id/:versione/:pin",
+        "method": "post"
+      }
+    ]
+  }
+}

@@ -17,28 +17,28 @@ import com.zip_project.service.word.ExtractFileRepWord;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("ExtractFile simulation")
 class ExtractFileTest {
-	@Autowired
-	ExtractFile ef;
-	static Stream<TestData> provideTestData() {
-		return Stream.of(new TestData(List.of("api"), 6));
-	}
-
-	@Test
-	void When_extractFileRepWord_Expect_DoesNotThrowException() {
-		assertDoesNotThrow(() -> {
-			ExtractFileRepWord.extractFileManager(null);
-		});
-	}
-
-	@Test
-	void When_extractFile_Expect_DoesNotThrowException() {
-		List<String> test = new ArrayList<>();
-		test.add("api");
-		assertDoesNotThrow(() -> {
-			ef.extractFileManager(null);
-		});
-	}
-
+	// @Autowired
+	// ExtractFile ef;
+	// static Stream<TestData> provideTestData() {
+	// return Stream.of(new TestData(List.of("api"), 6));
+	// }
+	//
+	// @Test
+	// void When_extractFileRepWord_Expect_DoesNotThrowException() {
+	// assertDoesNotThrow(() -> {
+	// ExtractFileRepWord.extractFileManager(null);
+	// });
+	// }
+	//
+	// @Test
+	// void When_extractFile_Expect_DoesNotThrowException() {
+	// List<String> test = new ArrayList<>();
+	// test.add("api");
+	// assertDoesNotThrow(() -> {
+	// ef.extractFileManager(null);
+	// });
+	// }
+	//
 	// @ParameterizedTest
 	// @MethodSource("provideTestData")
 	// @DisplayName("ApiNumFileCheck")

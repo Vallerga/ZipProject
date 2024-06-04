@@ -26,12 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class ExtractFile {
+public class AsyncExtractFile {
 
-	@Autowired
-	private ParseJsonManager parseJsonManager;
-	@Autowired
-	private JsonSchemaFriendService JSFService;
+
 
 	private static final Path SCHEMA_PATH = Path.of(
 			"C:\\sviluppo\\java_workspaces\\Jersey\\ZipProject\\src\\main\\resources\\JsonSchema\\apiSchema.json");
@@ -50,7 +47,7 @@ public class ExtractFile {
 		Path localSourceFile = Paths.get(SOURCE_FOLDER);
 		String tagName = generateTagName(paramFile, localSourceFile);
 		Path resourcePath = Paths.get(DESTINATION_FOLDER + tagName);
-		ExtractFile.staticFileName = tagName;
+		AsyncExtractFile.staticFileName = tagName;
 		try {
 			zis = loadLocalOrParamFile(paramFile, localSourceFile);
 
@@ -155,13 +152,13 @@ public class ExtractFile {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
 		if (paramFile != null) {
-			ExtractFile.staticFileName = paramFile.getName();
+			AsyncExtractFile.staticFileName = paramFile.getName();
 		} else {
-			ExtractFile.staticFileName = localSourceFile.getFileName()
+			AsyncExtractFile.staticFileName = localSourceFile.getFileName()
 					.toString();
 		}
 
-		return ExtractFile.staticFileName.toUpperCase() + " extracted at "
+		return AsyncExtractFile.staticFileName.toUpperCase() + " extracted at "
 				+ dataOdierna.format(formatter).replace('/', '.').replace(':',
 						'.');
 	}

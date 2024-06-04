@@ -16,6 +16,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.zip_project.service.ExtractFile;
 import com.zip_project.service.word.ExtractFileRepWord;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/extract")
 @ResponseStatus(HttpStatus.OK)
@@ -61,9 +64,8 @@ public class ExtractRest {
 		try {
 			List<JsonNode> extractFileManager = ef.extractFileManager(null);
 
-			System.out.println(
-					"extractFileManager syze: " + extractFileManager.size());
-			// System.out.println("extractFileManager: " + extractFileManager);
+			log.info("extractFileManager syze: " + extractFileManager.size());
+			// log.debug("extractFileManager: " + extractFileManager);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -80,10 +82,36 @@ public class ExtractRest {
 		try {
 			List<JsonNode> extractFileManager = ef.extractFileManager(file);
 
-			System.out.println(
-					"extractFileManager syze: " + extractFileManager.size());
-			// System.out.println("extractFileManager: " + extractFileManager);
+			log.info("extractFileManager syze: " + extractFileManager.size());
+			// log.debug("extractFileManager: " + extractFileManager);
 
+		} catch (IOException e) {
+			e.printStackTrace();
+			return e.getLocalizedMessage() + " \n " + e.getMessage();
+		}
+		return "FILE EXTRACTED";
+	}
+
+	@GetMapping("/async/local")
+	@ResponseStatus(HttpStatus.CREATED)
+	public String asyncExtractFile() {
+
+		try {
+			ef.extractFileManager(null);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return e.getLocalizedMessage() + " \n " + e.getMessage();
+
+		}
+		return "FILE EXTRACTED";
+	}
+
+	@PostMapping("/async/param")
+	@ResponseStatus(HttpStatus.CREATED)
+	public String asyncExtractFile(File file) {
+
+		try {
+			ef.extractFileManager(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return e.getLocalizedMessage() + " \n " + e.getMessage();

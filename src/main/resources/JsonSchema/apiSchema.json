@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "moduleDefaults": {
+      "type": "object",
+      "properties": {
+        "protocol": { "type": "string" },
+        "host": { "type": "string" },
+        "baseUrl": { "type": "string" },
+        "security": { "type": "string" }
+      },
+      "required": ["protocol", "host", "baseUrl", "security"]
+    },
+    "apis": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9-]+$": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "isMocked": { "type": "boolean" },
+              "name": { "type": "string" },
+              "baseUrl": { "type": "string" },
+              "endpoint": { "type": "string" },
+              "method": { "type": "string" }
+            },
+            "required": ["isMocked", "name", "baseUrl", "endpoint", "method"]
+          }
+        }
+      }
+    }
+  },
+  "required": ["moduleDefaults", "apis"]
+}
