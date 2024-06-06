@@ -1,4 +1,4 @@
-package com.zip_project.exception;
+package com.zip_project.service.exception;
 
 import net.jimblackler.jsonschemafriend.SchemaException;
 

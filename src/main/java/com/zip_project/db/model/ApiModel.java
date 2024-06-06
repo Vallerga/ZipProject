@@ -1,10 +1,6 @@
-package com.zip_project.model;
-
-import java.util.List;
+package com.zip_project.db.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,36 +9,36 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "ApiLists")
-public class ApiList {
-
+@Table(name = "ApiModels")
+public class ApiModel {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long idApiList;
-
+	private Long idApiModel;
+	
+	private Boolean isMocked;
+	
 	private String name;
-
+	
+	private String baseUrl;
+	
+	private String endpoint;
+	
+	private String method;
+	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "idModuleDefault")
+	@JoinColumn(name = "idApiList")
 	@JsonBackReference
-	private ModuleDefaults moduleDefault;
-
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "idApiModel")
-	@JsonManagedReference
-	@JsonIgnore
-	@ToString.Exclude
-	private List<ApiModel> apiModels;
+	private ApiList apiList;
 }

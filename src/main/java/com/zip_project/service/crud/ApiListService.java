@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.zip_project.model.ApiList;
-import com.zip_project.repository.ApiListDaoRepository;
+import com.zip_project.db.model.ApiList;
+import com.zip_project.db.repository.ApiListDaoRepository;
 
 @Service
 public class ApiListService {

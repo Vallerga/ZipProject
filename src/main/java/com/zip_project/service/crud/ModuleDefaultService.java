@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.zip_project.model.ModuleDefaults;
-import com.zip_project.repository.ModuleDefaultDaoRepository;
+import com.zip_project.db.model.ModuleDefaults;
+import com.zip_project.db.repository.ModuleDefaultDaoRepository;
 
 @Service
 public class ModuleDefaultService {

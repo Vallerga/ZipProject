@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.zip_project.model.FileStatus;
-import com.zip_project.repository.FileStatusDaoRepository;
+import com.zip_project.db.model.FileStatus;
+import com.zip_project.db.repository.FileStatusDaoRepository;
 
 @Service
 public class FileStatusService {

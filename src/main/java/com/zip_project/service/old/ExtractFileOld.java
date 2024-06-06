@@ -18,8 +18,8 @@ import java.util.zip.ZipInputStream;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.zip_project.exception.MyValidationException;
 import com.zip_project.service.SchemaValidationService;
+import com.zip_project.service.exception.MyValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,4 +1,4 @@
-package com.zip_project.costant;
+package com.zip_project.service.costant;
 
 public class Costant {
 

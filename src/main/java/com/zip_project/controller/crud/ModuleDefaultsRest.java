@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zip_project.model.ModuleDefaults;
+import com.zip_project.db.model.ModuleDefaults;
 import com.zip_project.service.crud.ModuleDefaultService;
 
 @RestController

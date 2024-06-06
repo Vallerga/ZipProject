@@ -1,4 +1,4 @@
-package com.zip_project.model;
+package com.zip_project.db.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

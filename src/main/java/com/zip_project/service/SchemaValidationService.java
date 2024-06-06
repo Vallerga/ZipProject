@@ -9,9 +9,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.zip_project.exception.MyValidationException;
-import com.zip_project.model.FileStatus;
+import com.zip_project.db.model.FileStatus;
 import com.zip_project.service.crud.FileStatusService;
+import com.zip_project.service.exception.MyValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 import net.jimblackler.jsonschemafriend.Schema;

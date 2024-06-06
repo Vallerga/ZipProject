@@ -12,16 +12,16 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zip_project.costant.Costant;
-import com.zip_project.exception.MyValidationException;
-import com.zip_project.model.ApiList;
-import com.zip_project.model.ApiModel;
-import com.zip_project.model.FileStatus;
-import com.zip_project.model.ModuleDefaults;
+import com.zip_project.db.model.ApiList;
+import com.zip_project.db.model.ApiModel;
+import com.zip_project.db.model.FileStatus;
+import com.zip_project.db.model.ModuleDefaults;
+import com.zip_project.service.costant.Costant;
 import com.zip_project.service.crud.ApiListService;
 import com.zip_project.service.crud.ApiModelService;
 import com.zip_project.service.crud.FileStatusService;
 import com.zip_project.service.crud.ModuleDefaultService;
+import com.zip_project.service.exception.MyValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 

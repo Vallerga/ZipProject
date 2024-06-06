@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.zip_project.model.ApiModel;
-import com.zip_project.repository.ApiModelDaoRepository;
+import com.zip_project.db.model.ApiModel;
+import com.zip_project.db.repository.ApiModelDaoRepository;
 
 @Service
 public class ApiModelService {

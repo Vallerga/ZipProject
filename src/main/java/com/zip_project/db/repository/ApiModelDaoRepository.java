@@ -1,9 +1,9 @@
-package com.zip_project.repository;
+package com.zip_project.db.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import com.zip_project.model.ApiModel;
+import com.zip_project.db.model.ApiModel;
 
 @Repository
 public interface ApiModelDaoRepository extends CrudRepository<ApiModel, Long> {
