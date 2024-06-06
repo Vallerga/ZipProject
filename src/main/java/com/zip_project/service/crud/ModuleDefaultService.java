@@ -2,7 +2,6 @@ package com.zip_project.service.crud;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.zip_project.model.ModuleDefaults;
@@ -10,8 +9,12 @@ import com.zip_project.repository.ModuleDefaultDaoRepository;
 
 @Service
 public class ModuleDefaultService {
-	@Autowired
-	ModuleDefaultDaoRepository mdDao;
+
+	private final ModuleDefaultDaoRepository mdDao;
+
+	public ModuleDefaultService(ModuleDefaultDaoRepository mdDao) {
+		this.mdDao = mdDao;
+	}
 
 	public String insertModuleDefault(ModuleDefaults md) {
 		mdDao.save(md);

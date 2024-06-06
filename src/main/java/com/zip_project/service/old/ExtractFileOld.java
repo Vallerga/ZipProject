@@ -1,4 +1,4 @@
-package com.zip_project.service;
+package com.zip_project.service.old;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,30 +15,33 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.zip_project.exception.MyValidationException;
-import com.zip_project.service.jsonschema.JsonSchemaFriendService;
+import com.zip_project.service.SchemaValidationService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class ExtractFile {
+public class ExtractFileOld {
 
-	@Autowired
-	private ParseJsonManager parseJsonManager;
-	@Autowired
-	private JsonSchemaFriendService JSFService;
+	private final ParseJsonManagerOld parseJsonManager;
+	private final SchemaValidationService jsonSFService;
+
+	public ExtractFileOld(ParseJsonManagerOld parseJsonManager,
+			SchemaValidationService jsonSFService) {
+		this.parseJsonManager = parseJsonManager;
+		this.jsonSFService = jsonSFService;
+	}
 
 	private static final Path SCHEMA_PATH = Path.of(
 			"C:\\sviluppo\\java_workspaces\\Jersey\\ZipProject\\src\\main\\resources\\JsonSchema\\apiSchema.json");
 	private static final String DESTINATION_FOLDER = "C:/sviluppo/java_workspaces/Jersey/unzipFile/";
 	private static final String SOURCE_FOLDER = "C:/sviluppo/java_workspaces/Jersey/ZipProject/src/main/resources/zipFile/xdce-module-tbgtee.zip";
 	private static String staticFileName = "";
-	
+
 	public List<JsonNode> extractFileManager(File paramFile)
 			throws IOException {
 		byte[] zipStreamBuffer = new byte[1024];
@@ -46,11 +49,11 @@ public class ExtractFile {
 		ZipInputStream zis = null;
 		ZipEntry zipEntry;
 
-		// Folder path definition
+		// folder path definition
 		Path localSourceFile = Paths.get(SOURCE_FOLDER);
 		String tagName = generateTagName(paramFile, localSourceFile);
 		Path resourcePath = Paths.get(DESTINATION_FOLDER + tagName);
-		ExtractFile.staticFileName = tagName;
+		ExtractFileOld.staticFileName = tagName;
 		try {
 			zis = loadLocalOrParamFile(paramFile, localSourceFile);
 
@@ -72,14 +75,10 @@ public class ExtractFile {
 		while (zipEntry != null) {
 			Path newFilePath = newFile(resourcePath, zipEntry);
 
-			// Count and describe folders during the extraction process
 			if (zipEntry.isDirectory()) {
 				if (!Files.exists(newFilePath))
 					Files.createDirectories(newFilePath);
-			}
-
-			// Count and describe files during the extraction process
-			else {
+			} else {
 				Path parent = newFilePath.getParent();
 				if (!Files.exists(parent)) {
 					Files.createDirectories(parent);
@@ -104,22 +103,22 @@ public class ExtractFile {
 				fos.write(zipStreamBuffer, 0, len);
 			}
 
-			// Validate Json
+			// validate Json
+			errorMessage.add(jsonSFService.validateSingleFileOld(newFilePath,
+					SCHEMA_PATH));
 
-			errorMessage.add(JSFService.jsonValidation(newFilePath, SCHEMA_PATH));
-
+			// parse validated json in class structure
 			JsonNode result = parseJsonManager.parseJSON(newFilePath,
 					staticFileName);
 			if (result != null && !result.isEmpty())
 				jsonNodeList.add(result);
 
-			// String line list approach
+			// string line list approach
 			/*
 			 * List<String> StringList =
 			 * StringLineListApproach.apiTest(newFilePath);
 			 */
 		} catch (MyValidationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return jsonNodeList;
@@ -129,11 +128,11 @@ public class ExtractFile {
 			Path localSourceFile) throws IOException {
 		ZipInputStream zis = null;
 
-		// Check provided source presence
+		// check provided source presence
 		Optional<File> isNullFile = Optional.ofNullable(paramFile);
 		Boolean paramIsNull = !isNullFile.isPresent();
 
-		// Extract a file from a local source or a provided source
+		// extract a file from a local source or a provided source
 		try {
 			if (Boolean.TRUE.equals(paramIsNull)) {
 				zis = new ZipInputStream(
@@ -148,20 +147,20 @@ public class ExtractFile {
 		return zis;
 	}
 
-	// Generate unique name with date + time tag
+	// generate unique name with date + time tag
 	private String generateTagName(File paramFile, Path localSourceFile) {
 		LocalDateTime dataOdierna = LocalDateTime.now();
 		String pattern = "dd/MM/yyyy HH:mm:ss";
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
 		if (paramFile != null) {
-			ExtractFile.staticFileName = paramFile.getName();
+			ExtractFileOld.staticFileName = paramFile.getName();
 		} else {
-			ExtractFile.staticFileName = localSourceFile.getFileName()
+			ExtractFileOld.staticFileName = localSourceFile.getFileName()
 					.toString();
 		}
 
-		return ExtractFile.staticFileName.toUpperCase() + " extracted at "
+		return ExtractFileOld.staticFileName.toUpperCase() + " extracted at "
 				+ dataOdierna.format(formatter).replace('/', '.').replace(':',
 						'.');
 	}

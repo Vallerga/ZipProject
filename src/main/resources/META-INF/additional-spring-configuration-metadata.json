@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "folder.destination",
+    "type": "java.lang.String",
+    "description": "Local Path where extract file"
+  },
+  {
+    "name": "folder.source",
+    "type": "java.lang.String",
+    "description": "Source of compressed file"
+  },
+  {
+    "name": "json.schema.path",
+    "type": "java.lang.String",
+    "description": "Standard schema accepted for Api Json"
+  }
+]}

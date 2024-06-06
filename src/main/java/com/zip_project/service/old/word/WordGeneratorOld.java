@@ -1,4 +1,4 @@
-package com.zip_project.service.word;
+package com.zip_project.service.old.word;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,9 +10,9 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 
-public class WordGenerator {
+public class WordGeneratorOld {
 
-	private WordGenerator() {
+	private WordGeneratorOld() {
 	}
 
 	private static final String FONT_FAMILY = "Arial";

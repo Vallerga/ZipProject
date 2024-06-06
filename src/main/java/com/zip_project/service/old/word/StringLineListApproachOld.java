@@ -1,4 +1,4 @@
-package com.zip_project.service.word;
+package com.zip_project.service.old.word;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,9 +11,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class StringLineListApproach {
+public class StringLineListApproachOld {
 
-	private StringLineListApproach() {
+	private StringLineListApproachOld() {
 	}
 
 	// Api test

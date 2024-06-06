@@ -24,6 +24,13 @@ public class Costant {
 	public static final Integer ROOTNODE_ATTRIBUTE = 2;
 	public static final Integer MODULE_DEFAULTS_ATTRIBUTE = 4;
 	
+	// apis attribute costant
+	public static final String APIS_ISMOCKED = "isMocked";
+	public static final String APIS_NAME = "name";
+	public static final String APIS_BASEURL = "baseUrl";
+	public static final String APIS_ENDPOINT = "endpoint";
+	public static final String APIS_METHOD = "method";
+	
 	// Array interface
 	
 	public static String[] getModuleDefaultProtocol() {

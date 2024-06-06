@@ -1,18 +1,7 @@
 package com.zip_project;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.zip_project.service.ExtractFile;
-import com.zip_project.service.word.ExtractFileRepWord;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("ExtractFile simulation")

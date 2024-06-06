@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,8 +12,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.zip_project.service.ExtractFile;
-import com.zip_project.service.word.ExtractFileRepWord;
+import com.zip_project.service.ExtractFileService;
+import com.zip_project.service.old.ExtractFileOld;
+import com.zip_project.service.old.word.ExtractFileRepWordOld;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,8 +24,14 @@ import lombok.extern.slf4j.Slf4j;
 @ResponseStatus(HttpStatus.OK)
 public class ExtractRest {
 
-	@Autowired
-	ExtractFile ef;
+	private final ExtractFileOld extractFileOld;
+	private final ExtractFileService extractFileService;
+	private static final String EXTRACTED_EXTRACTED = "FILE EXTRACTED";
+
+	public ExtractRest(ExtractFileOld extractFileOld, ExtractFileService extractFileService) {
+		this.extractFileOld = extractFileOld;
+		this.extractFileService = extractFileService;
+	}
 
 	@GetMapping("/test")
 	public String extractFileTest() {
@@ -34,88 +40,89 @@ public class ExtractRest {
 
 	@GetMapping("/word/local")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String extractFileRepWord() {
+	public String extractFileRepWordOld() {
 		try {
-			ExtractFileRepWord.extractFileManager(null);
+			ExtractFileRepWordOld.extractFileManager(null);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return e.getLocalizedMessage() + " \n " + e.getMessage();
 
 		}
-		return "FILE EXTRACTED";
+		return EXTRACTED_EXTRACTED;
 	}
 
 	@PostMapping("/word/param")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String extractFileRepWord(File file) {
+	public String extractFileRepWordOld(File file) {
 		try {
-			ExtractFileRepWord.extractFileManager(file);
+			ExtractFileRepWordOld.extractFileManager(file);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return e.getLocalizedMessage() + " \n " + e.getMessage();
 		}
-		return "FILE EXTRACTED";
+		return EXTRACTED_EXTRACTED;
+	}
+
+	@GetMapping("/sync/local")
+	@ResponseStatus(HttpStatus.CREATED)
+	public String extractFileOld() {
+
+		try {
+			List<JsonNode> extractFileManager = extractFileOld.extractFileManager(null);
+
+			log.info("extractFileManager syze: " + extractFileManager.size());
+			// log.debug("extractFileManager: " + extractFileManager);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return e.getLocalizedMessage() + " \n " + e.getMessage();
+
+		}
+		return EXTRACTED_EXTRACTED;
+	}
+
+	@PostMapping("/sync/param")
+	@ResponseStatus(HttpStatus.CREATED)
+	public String extractFileOld(File file) {
+
+		try {
+			List<JsonNode> extractFileManager = extractFileOld.extractFileManager(file);
+
+			log.info("extractFileManager syze: " + extractFileManager.size());
+			// log.debug("extractFileManager: " + extractFileManager);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return e.getLocalizedMessage() + " \n " + e.getMessage();
+		}
+		return EXTRACTED_EXTRACTED;
 	}
 
 	@GetMapping("/local")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String extractFile() {
-
+	public Integer localExtractFile() {
+		Integer result = null;
 		try {
-			List<JsonNode> extractFileManager = ef.extractFileManager(null);
-
-			log.info("extractFileManager syze: " + extractFileManager.size());
-			// log.debug("extractFileManager: " + extractFileManager);
-
+			result = extractFileService.extractFileManager(null);
 		} catch (IOException e) {
+			log.info(e.getLocalizedMessage() + " \n " + e.getMessage());
+		} catch (Exception e) {
 			e.printStackTrace();
-			return e.getLocalizedMessage() + " \n " + e.getMessage();
-
 		}
-		return "FILE EXTRACTED";
+		return result;
 	}
 
 	@PostMapping("/param")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String extractFile(File file) {
-
+	public Integer paramExtractFile(File file) {
+		Integer result = null;
 		try {
-			List<JsonNode> extractFileManager = ef.extractFileManager(file);
-
-			log.info("extractFileManager syze: " + extractFileManager.size());
-			// log.debug("extractFileManager: " + extractFileManager);
-
+			extractFileService.extractFileManager(file);
 		} catch (IOException e) {
+			log.info(e.getLocalizedMessage() + " \n " + e.getMessage());
+		} catch (Exception e) {
 			e.printStackTrace();
-			return e.getLocalizedMessage() + " \n " + e.getMessage();
 		}
-		return "FILE EXTRACTED";
-	}
-
-	@GetMapping("/async/local")
-	@ResponseStatus(HttpStatus.CREATED)
-	public String asyncExtractFile() {
-
-		try {
-			ef.extractFileManager(null);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return e.getLocalizedMessage() + " \n " + e.getMessage();
-
-		}
-		return "FILE EXTRACTED";
-	}
-
-	@PostMapping("/async/param")
-	@ResponseStatus(HttpStatus.CREATED)
-	public String asyncExtractFile(File file) {
-
-		try {
-			ef.extractFileManager(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return e.getLocalizedMessage() + " \n " + e.getMessage();
-		}
-		return "FILE EXTRACTED";
+		return result;
 	}
 }

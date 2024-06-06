@@ -1,8 +1,7 @@
-package com.zip_project.controller;
+package com.zip_project.controller.crud;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,40 +12,54 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zip_project.model.ModuleDefaults;
-import com.zip_project.service.crud.ModuleDefaultService;
+import com.zip_project.model.ApiList;
+import com.zip_project.service.crud.ApiListService;
 
 @RestController
-@RequestMapping("/md")
+@RequestMapping("/apiList")
 @ResponseStatus(HttpStatus.OK)
-public class ModuleDefaultsRest {
+public class ApiListRest {
+	private final ApiListService apiListService;
 
-	@Autowired
-	ModuleDefaultService mdService;
-	
+	public ApiListRest(ApiListService apiListService) {
+		this.apiListService = apiListService;
+	}
+
 	@GetMapping("/test")
-	public String extractFileTest() {
+	public String apiListTest() {
 		return "test connection";
 	}
 
 	@PostMapping("/insert")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String insertModuleDefault(ModuleDefaults md) {
+	public String insertApiList(ApiList apiList) {
 		String result = null;
 		try {
-			result = mdService.insertModuleDefault(md);
+			result = apiListService.insertApiList(apiList);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
-	
-	@PutMapping("/insert")
+
+	@PutMapping("/update")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String updateModuleDefault(ModuleDefaults md) {
+	public String updateApiList(ApiList apiList) {
 		String result = null;
 		try {
-			result = mdService.updateModuleDefault(md);
+			result = apiListService.updateApiList(apiList);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@DeleteMapping("remove")
+	@ResponseStatus(HttpStatus.OK)
+	public String deleteApiListById(@RequestParam Long id) {
+		String result = null;
+		try {
+			result = apiListService.removeApiListById(id);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -58,7 +71,7 @@ public class ModuleDefaultsRest {
 	public String deleteAll() {
 		String result = null;
 		try {
-			result = mdService.removeAll();
+			result = apiListService.removeAll();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -67,11 +80,10 @@ public class ModuleDefaultsRest {
 
 	@GetMapping("/findbyid")
 	@ResponseStatus(HttpStatus.FOUND)
-	public ModuleDefaults findModuleDefaultById(
-			@RequestParam Long id) {
-		ModuleDefaults result = null;
+	public ApiList findApiListById(@RequestParam Long id) {
+		ApiList result = null;
 		try {
-			result = mdService.findModuleDefaultById(id);
+			result = apiListService.findApiListById(id);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -80,10 +92,10 @@ public class ModuleDefaultsRest {
 
 	@GetMapping("/findall")
 	@ResponseStatus(HttpStatus.FOUND)
-	public List<ModuleDefaults> findAllModuleDefaults() {
-		List<ModuleDefaults> result = null;
+	public List<ApiList> findAllApiLists() {
+		List<ApiList> result = null;
 		try {
-			result = mdService.findAll();
+			result = apiListService.findAll();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

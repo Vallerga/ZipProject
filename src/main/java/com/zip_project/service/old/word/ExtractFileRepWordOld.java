@@ -1,4 +1,4 @@
-package com.zip_project.service.word;
+package com.zip_project.service.old.word;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,9 +21,9 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ExtractFileRepWord {
+public class ExtractFileRepWordOld {
 
-	private ExtractFileRepWord() {
+	private ExtractFileRepWordOld() {
 	}
 
 	private static final String DESTINATION_FOLDER = "C:/sviluppo/java_workspaces/Jersey/unzipFile/";
@@ -55,10 +55,10 @@ public class ExtractFileRepWord {
 			ZipEntry zipEntry = zis.getNextEntry();
 
 			// Initialize report document
-			document = WordGenerator.generateWord(DOCUMENT_NAME);
-			WordGenerator.summary(counterNum, folderNum, filesNum, document);
+			document = WordGeneratorOld.generateWord(DOCUMENT_NAME);
+			WordGeneratorOld.summary(counterNum, folderNum, filesNum, document);
 
-			WordGenerator.subtitle(document, "FILE DESCRIPTION");
+			WordGeneratorOld.subtitle(document, "FILE DESCRIPTION");
 			while (zipEntry != null) {
 				Path newFilePath = newFile(resourcePath, zipEntry);
 
@@ -94,7 +94,7 @@ public class ExtractFileRepWord {
 			}
 
 			// Finalize report word document
-			WordGenerator.documentWrite(document, resourcePath, DOCUMENT_NAME);
+			WordGeneratorOld.documentWrite(document, resourcePath, DOCUMENT_NAME);
 		} catch (IOException e) {
 			log.error("Error while extracting file: " + e.getMessage());
 			throw e;
@@ -148,7 +148,7 @@ public class ExtractFileRepWord {
 			fileAttributes.add("0");
 		}
 
-		WordGenerator.describeFile(document, fileAttributes);
+		WordGeneratorOld.describeFile(document, fileAttributes);
 	}
 
 }

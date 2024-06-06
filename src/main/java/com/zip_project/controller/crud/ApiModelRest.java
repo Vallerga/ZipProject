@@ -1,8 +1,7 @@
-package com.zip_project.controller;
+package com.zip_project.controller.crud;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,17 +12,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zip_project.model.ApiList;
-import com.zip_project.service.crud.ApiListService;
+import com.zip_project.model.ApiModel;
+import com.zip_project.service.crud.ApiModelService;
 
 @RestController
-@RequestMapping("/apiList")
+@RequestMapping("/apimodel")
 @ResponseStatus(HttpStatus.OK)
-public class ApiListRest {
+public class ApiModelRest {
 
-	@Autowired
-	ApiListService apiListService;
+	private final ApiModelService apiModelService;
 
+	public ApiModelRest(ApiModelService apiModelService) {
+		this.apiModelService = apiModelService;
+	}
 	@GetMapping("/test")
 	public String extractFileTest() {
 		return "test connection";
@@ -31,10 +32,10 @@ public class ApiListRest {
 
 	@PostMapping("/insert")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String insertApiList(ApiList apiList) {
+	public String insertApiModel(ApiModel apiModel) {
 		String result = null;
 		try {
-			result = apiListService.insertApiList(apiList);
+			result = apiModelService.insertApiModel(apiModel);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -43,10 +44,10 @@ public class ApiListRest {
 
 	@PutMapping("/insert")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String updateApiList(ApiList apiList) {
+	public String updateApiModel(ApiModel apiModel) {
 		String result = null;
 		try {
-			result = apiListService.updateApiList(apiList);
+			result = apiModelService.updateApiModel(apiModel);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -58,7 +59,7 @@ public class ApiListRest {
 	public String deleteAll() {
 		String result = null;
 		try {
-			result = apiListService.removeAll();
+			result = apiModelService.removeAll();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -67,10 +68,10 @@ public class ApiListRest {
 
 	@GetMapping("/findbyid")
 	@ResponseStatus(HttpStatus.FOUND)
-	public ApiList findApiListById(@RequestParam Long id) {
-		ApiList result = null;
+	public ApiModel findApiModelById(@RequestParam Long id) {
+		ApiModel result = null;
 		try {
-			result = apiListService.findApiListById(id);
+			result = apiModelService.findApiModelById(id);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -79,10 +80,10 @@ public class ApiListRest {
 
 	@GetMapping("/findall")
 	@ResponseStatus(HttpStatus.FOUND)
-	public List<ApiList> findAllApiLists() {
-		List<ApiList> result = null;
+	public List<ApiModel> findAllApiModels() {
+		List<ApiModel> result = null;
 		try {
-			result = apiListService.findAll();
+			result = apiModelService.findAll();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

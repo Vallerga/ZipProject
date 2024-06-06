@@ -1,4 +1,4 @@
-package com.zip_project.controller;
+package com.zip_project.controller.crud;
 
 import java.util.List;
 
@@ -13,17 +13,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zip_project.model.ApiModel;
-import com.zip_project.service.crud.ApiModelService;
+import com.zip_project.model.ModuleDefaults;
+import com.zip_project.service.crud.ModuleDefaultService;
 
 @RestController
-@RequestMapping("/apimodel")
+@RequestMapping("/md")
 @ResponseStatus(HttpStatus.OK)
-public class ApiModelRest {
+public class ModuleDefaultsRest {
 
 	@Autowired
-	ApiModelService apiModelService;
-
+	ModuleDefaultService mdService;
+	
 	@GetMapping("/test")
 	public String extractFileTest() {
 		return "test connection";
@@ -31,22 +31,22 @@ public class ApiModelRest {
 
 	@PostMapping("/insert")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String insertApiModel(ApiModel apiModel) {
+	public String insertModuleDefault(ModuleDefaults md) {
 		String result = null;
 		try {
-			result = apiModelService.insertApiModel(apiModel);
+			result = mdService.insertModuleDefault(md);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return result;
 	}
-
+	
 	@PutMapping("/insert")
 	@ResponseStatus(HttpStatus.CREATED)
-	public String updateApiModel(ApiModel apiModel) {
+	public String updateModuleDefault(ModuleDefaults md) {
 		String result = null;
 		try {
-			result = apiModelService.updateApiModel(apiModel);
+			result = mdService.updateModuleDefault(md);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -58,7 +58,7 @@ public class ApiModelRest {
 	public String deleteAll() {
 		String result = null;
 		try {
-			result = apiModelService.removeAll();
+			result = mdService.removeAll();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -67,10 +67,11 @@ public class ApiModelRest {
 
 	@GetMapping("/findbyid")
 	@ResponseStatus(HttpStatus.FOUND)
-	public ApiModel findApiModelById(@RequestParam Long id) {
-		ApiModel result = null;
+	public ModuleDefaults findModuleDefaultById(
+			@RequestParam Long id) {
+		ModuleDefaults result = null;
 		try {
-			result = apiModelService.findApiModelById(id);
+			result = mdService.findModuleDefaultById(id);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -79,10 +80,10 @@ public class ApiModelRest {
 
 	@GetMapping("/findall")
 	@ResponseStatus(HttpStatus.FOUND)
-	public List<ApiModel> findAllApiModels() {
-		List<ApiModel> result = null;
+	public List<ModuleDefaults> findAllModuleDefaults() {
+		List<ModuleDefaults> result = null;
 		try {
-			result = apiModelService.findAll();
+			result = mdService.findAll();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

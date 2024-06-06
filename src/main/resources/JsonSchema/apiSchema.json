@@ -26,7 +26,7 @@
               "endpoint": { "type": "string" },
               "method": { "type": "string" }
             },
-            "required": ["isMocked", "name", "baseUrl", "endpoint", "method"]
+            "required": ["name", "baseUrl", "endpoint", "method"]
           }
         }
       }

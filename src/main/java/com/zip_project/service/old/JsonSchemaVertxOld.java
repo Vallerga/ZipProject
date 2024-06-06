@@ -1,4 +1,4 @@
-package com.zip_project.service.jsonschema;
+package com.zip_project.service.old;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class JsonSchemaVertxService {
+public class JsonSchemaVertxOld {
 
 	// @Value("${json.schema.path}")
 	// private String schemaPath;
@@ -24,26 +24,26 @@ public class JsonSchemaVertxService {
 	public String jsonValidation() {
 		String result = null;
 		try {
-			// Definisci il percorso completo dello schema JSON
+			// definisci il percorso completo dello schema JSON
 			String schemaPath = "C:\\sviluppo\\java_workspaces\\Jersey\\ZipProject\\src\\main\\resources\\JsonSchema\\apiSchema.json";
 
-			// Carica lo schema JSON
+			// carica lo schema JSON
 			String schemaContent = new String(
 					Files.readAllBytes(Paths.get(schemaPath)));
 			JsonObject schemaObject = new JsonObject(schemaContent);
 			JsonSchema schema = JsonSchema.of(schemaObject);
 
-			// Carica gli schemi JSON dai file
+			// carica gli schemi JSON dai file
 			// String validJsonLocation =
 			// "C:\\sviluppo\\java_workspaces\\Jersey\\ZipProject\\src\\main\\resources\\JsonSchema\\api.json";
 			String notValidJsonLocation = "C:\\sviluppo\\java_workspaces\\Jersey\\ZipProject\\src\\main\\resources\\JsonSchema\\notValidApi.json";
 
-			// Carica il JSON da validare
+			// carica il JSON da validare
 			String jsonContent = new String(
 					Files.readAllBytes(Paths.get(notValidJsonLocation)));
 			JsonObject jsonObject = new JsonObject(jsonContent);
 
-			// Valida il JSON rispetto allo schema principale
+			// valida il JSON rispetto allo schema principale
 			OutputUnit resultValidation = Validator
 					.create(schema,
 							new JsonSchemaOptions().setDraft(Draft.DRAFT7)

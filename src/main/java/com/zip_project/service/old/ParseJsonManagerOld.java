@@ -1,4 +1,4 @@
-package com.zip_project.service;
+package com.zip_project.service.old;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,29 +23,32 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class ParseJsonManager {
+public class ParseJsonManagerOld {
 
 	private static String[] validHosts = Costant.getModuleDefaultHost();
 
-	@Autowired
-	private ModuleDefaultService mdService;
-	@Autowired
-	private ApiListService apiListService;
-	@Autowired
-	private ApiModelService apiModelService;
+	private final ModuleDefaultService mdService;
+	private final ApiListService apiListService;
+	private final ApiModelService apiModelService;
+
+	public ParseJsonManagerOld(ModuleDefaultService mdService,
+			ApiListService apiListService, ApiModelService apiModelService) {
+		this.mdService = mdService;
+		this.apiListService = apiListService;
+		this.apiModelService = apiModelService;
+	}
 
 	public JsonNode parseJSON(Path newFilePath, String fileName)
 			throws IOException {
 		ModuleDefaults mdj = null;
 		ObjectMapper mapper = new ObjectMapper();
-		newFilePath.toString();
 
-		// Read the JSON file
+		// read the JSON file
 		JsonNode rootNode = mapper.readTree(new File(newFilePath.toString()));
 
 		String rootNodeResult = rootNodeTest(rootNode);
 
-		// Extract data from root node
+		// extract data from root node
 		if (rootNodeResult.equals("rootNode validate")) {
 			JsonNode md = rootNode.path(Costant.ROOTNODE_MODULE_DEFAULTS);
 
@@ -65,9 +67,9 @@ public class ParseJsonManager {
 			}
 		}
 
-		// Iterate throw apis
+		// iterate throw apis
 		JsonNode apis = rootNode.path(Costant.ROOTNODE_APIS);
-		
+
 		apiListTest(apis);
 
 		Iterator<Map.Entry<String, JsonNode>> fields = apis.fields();
@@ -216,7 +218,21 @@ public class ParseJsonManager {
 		return url;
 	}
 
-		public String apiListTest(JsonNode apiListNode){
+	// TODO
+	public String apiListTest(JsonNode apiListNode) {
+
+		Integer fieldCounter = 0;
+		Iterator<Map.Entry<String, JsonNode>> mdIterator = apiListNode.fields();
+		while (mdIterator.hasNext()) {
+			mdIterator.next();
+			fieldCounter++;
+		}
 		return null;
 	}
 }
+
+// {"isMocked": false,
+// "name": "getListaPratiche",
+// "baseUrl": "/api/trade-banca/s0tb0/tbcommon/v1",
+// "endpoint": "/banca/common/pratica/lista/:codProdotto/:idTab",
+// "method": "get"}

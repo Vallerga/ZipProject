@@ -2,7 +2,6 @@ package com.zip_project.service.crud;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.zip_project.model.ApiModel;
@@ -11,8 +10,11 @@ import com.zip_project.repository.ApiModelDaoRepository;
 @Service
 public class ApiModelService {
 
-	@Autowired
-	ApiModelDaoRepository apiModelDao;
+	private final ApiModelDaoRepository apiModelDao;
+
+	public ApiModelService(ApiModelDaoRepository apiModelDao) {
+		this.apiModelDao = apiModelDao;
+	}
 
 	public String insertApiModel(ApiModel apiModel) {
 		apiModelDao.save(apiModel);
