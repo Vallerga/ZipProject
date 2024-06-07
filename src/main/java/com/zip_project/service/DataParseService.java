@@ -2,6 +2,7 @@ package com.zip_project.service;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,49 +24,52 @@ import com.zip_project.service.crud.FileStatusService;
 import com.zip_project.service.crud.ModuleDefaultService;
 import com.zip_project.service.exception.MyValidationException;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Service
 public class DataParseService {
 
 	private static String[] validHosts = Costant.getModuleDefaultHost();
 	private final FileStatusService fileStatusService;
-	private final ModuleDefaultService mdService;
+	private final ModuleDefaultService moduleDefaultService;
 	private final ApiListService apiListService;
 	private final ApiModelService apiModelService;
 
 	public DataParseService(FileStatusService fileStatusService,
-			ModuleDefaultService mdService, ApiListService apiListService,
-			ApiModelService apiModelService) {
+			ModuleDefaultService moduleDefaultService,
+			ApiListService apiListService, ApiModelService apiModelService) {
 		this.fileStatusService = fileStatusService;
-		this.mdService = mdService;
+		this.moduleDefaultService = moduleDefaultService;
 		this.apiListService = apiListService;
 		this.apiModelService = apiModelService;
 	}
 
-	public List<JsonNode> parseJsonManager(Integer reportNumber) {
+	public List<ModuleDefaults> parseJsonManager(Integer reportNumber) {
 		// extract files associated with a specific report
-		List<JsonNode> jsonNodesList = new ArrayList<>();
+		List<ModuleDefaults> moduleDefaultsList = new ArrayList<>();
 		List<FileStatus> statusList = fileStatusService
 				.findByReportNumber(reportNumber);
 
 		for (FileStatus es : statusList) {
+			// the non-environment file is always positioned at the start of the
+			// list
 			try {
-				jsonNodesList.add(parseSingleFile(es));
+				if (Boolean.FALSE.equals(
+						es.getFilePath().contains(Costant.PATH_NOT_ENV)))
+					moduleDefaultsList.add(0, parseSingleFile(es));
+				else
+					moduleDefaultsList.add(parseSingleFile(es));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		return jsonNodesList;
+		return moduleDefaultsList;
 	}
 
-	public JsonNode parseSingleFile(FileStatus es) {
+	public ModuleDefaults parseSingleFile(FileStatus es) {
 		String jsonPath = null;
-		ModuleDefaults mdj = null;
+		String apiTestResult = "";
+		ModuleDefaults moduleDefaults = null;
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode rootNode = null;
-		List<JsonNode> apiListNode;
 		try {
 			if (es != null && es.getFilePath() != null) {
 				jsonPath = es.getFilePath();
@@ -79,88 +83,141 @@ public class DataParseService {
 			String validationResult = es.getJsonValidationStatus();
 
 			// extract data from root node
-			if (validationResult.equals("validated")) {
-				JsonNode md = rootNode.path(Costant.ROOTNODE_MODULE_DEFAULTS);
+			if (validationResult.equals(Costant.JSON_VALIDATED)) {
+				JsonNode moduleDefaultsNode = rootNode
+						.path(Costant.ROOTNODE_MODULE_DEFAULTS);
 
-				String mdTestResult = moduleDefaultsTest(md, jsonPath,
-						es.getRootName());
+				String mdTestResult = moduleDefaultsTest(moduleDefaultsNode,
+						jsonPath, es.getRootName());
 
-				mdj = loadModuleDefault(jsonPath, mdj, md, mdTestResult);
+				if (Objects.equals(mdTestResult, Costant.JSON_VALIDATED)) {
+					moduleDefaults = loadModuleDefault(jsonPath, moduleDefaults,
+							moduleDefaultsNode);
+
+					// iterate throw apiListNode
+					JsonNode allApiListNode = rootNode
+							.path(Costant.ROOTNODE_APIS);
+
+					apiTestResult = apiListTest(allApiListNode);
+
+					if (apiTestResult.equals(Costant.JSON_VALIDATED))
+						loadApiList(moduleDefaults, allApiListNode);
+				} else {
+					throw new Exception(
+							"Module default data not valid and didn't pass the test");
+				}
+
 			}
 
-			// iterate throw apis
-			JsonNode apis = rootNode.path(Costant.ROOTNODE_APIS);
-
-			apiListNode = apiListTest(apis);
-			log.info(apiListNode.toString());
-			Iterator<Map.Entry<String, JsonNode>> fields = apis.fields();
-
-			loadApiList(mdj, fields);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return rootNode;
-	}
-
-	private void loadApiList(ModuleDefaults mdj,
-			Iterator<Map.Entry<String, JsonNode>> fields) {
-		while (fields.hasNext()) {
-			Map.Entry<String, JsonNode> field = fields.next();
-			String apiCategory = field.getKey();
-			JsonNode apiListNode = field.getValue();
-
-			ApiList apiList = null;
-			apiList = ApiList.builder().name(apiCategory).moduleDefault(mdj)
-					.build();
-			log.debug("mdj id: {}, APIList:{}",
-					apiList.getModuleDefault().getIdModuleDefaults(),
-					apiList.getName());
-
-			apiListService.insertApiList(apiList);
-
-			loadApiModels(apiListNode, apiList);
-		}
+		return moduleDefaults;
 	}
 
 	private ModuleDefaults loadModuleDefault(String jsonPath,
-			ModuleDefaults mdj, JsonNode md, String mdTestResult) {
-		if (mdTestResult.equals("moduleDefaults validate")) {
-			mdj = ModuleDefaults.builder().baseUrl(md.path("baseurl").asText())
-					.path(jsonPath).host(md.path("host").asText())
-					.security(md.path("security").asText())
-					.protocol(md.path("protocol").asText()).build();
-			log.debug("MODEL DEFAULT: {}", mdj);
+			ModuleDefaults moduleDefaults, JsonNode moduleDefaultsNode)
+			throws Exception {
 
-			mdService.insertModuleDefault(mdj);
+		if (moduleDefaults == null && moduleDefaultsNode == null) {
+			throw new Exception(
+					"Invalid parameter, moduleDefaults can't be null");
 		}
-		return mdj;
+
+		List<ApiList> apiList = new ArrayList<>();
+
+		moduleDefaults = ModuleDefaults.builder()
+				.baseUrl(moduleDefaultsNode
+						.path(Costant.MODULE_DEFAULT_NAME_BASEURL).asText())
+				.path(jsonPath)
+				.host(moduleDefaultsNode.path(Costant.MODULE_DEFAULT_NAME_HOST)
+						.asText())
+				.security(moduleDefaultsNode
+						.path(Costant.MODULE_DEFAULT_NAME_SECURITY).asText())
+				.protocol(moduleDefaultsNode
+						.path(Costant.MODULE_DEFAULT_NAME_PROTOCOL).asText())
+				.apiList(apiList).build();
+
+		moduleDefaultService.insertModuleDefault(moduleDefaults);
+
+		return moduleDefaults;
 	}
 
-	private void loadApiModels(JsonNode apiListNode, ApiList apiList) {
-		if (apiListNode.isArray()) {
-			for (JsonNode api : apiListNode) {
-				ApiModel am = null;
+	private void loadApiList(ModuleDefaults moduleDefaults,
+			JsonNode allApiListNode) throws Exception {
+		ApiList apiList = null;
+		List<ApiModel> apiModelList = new ArrayList<>();
+		List<ApiList> apiListContainer;
 
-				am = ApiModel.builder().name(api.path("name").asText())
-						.baseUrl(api.path("baseUrl").asText())
-						.endpoint(api.path("endpoint").asText())
-						.method(api.path("method").asText()).apiList(apiList)
-						.build();
+		if (moduleDefaults == null && allApiListNode == null) {
+			throw new Exception(
+					"Invalid parameter, moduleDefaults can't be null");
+		}
 
-				if (!api.findPath("isMocked").isMissingNode())
-					am.setIsMocked(api.path("isMocked").asBoolean());
+		if (moduleDefaults.getApiList() != null)
+			apiListContainer = new ArrayList<>();
+		else
+			apiListContainer = moduleDefaults.getApiList();
 
-				apiModelService.insertApiModel(am);
-				log.debug("ApiList id: {}, APIModel:{} - {}",
-						am.getApiList().getIdApiList(), am.getName(),
-						am.getBaseUrl());
+		Iterator<Map.Entry<String, JsonNode>> apiListIterator = allApiListNode
+				.fields();
+
+		while (apiListIterator.hasNext()) {
+			Map.Entry<String, JsonNode> apiListMap = apiListIterator.next();
+			String apiListKey = apiListMap.getKey();
+			JsonNode singleApiListNode = apiListMap.getValue();
+
+			apiList = ApiList.builder().name(apiListKey)
+					.moduleDefaults(moduleDefaults).apiModels(apiModelList)
+					.build();
+
+			apiListService.insertApiList(apiList);
+
+			loadApiModels(apiList, singleApiListNode);
+
+			apiListContainer.add(apiList);
+			moduleDefaults.setApiList(apiListContainer);
+		}
+	}
+
+	private void loadApiModels(ApiList apiList, JsonNode singleApiListNode)
+			throws Exception {
+		ApiModel apiModel = null;
+		List<ApiModel> apiModelList = new ArrayList<>();
+
+		if (apiList == null || singleApiListNode == null) {
+			throw new Exception(
+					"Invalid parameter, apiList and singleApiListNode can't be null");
+		} else if (singleApiListNode.isArray()) {
+			for (JsonNode apiModelNode : singleApiListNode) {
+
+				apiModel = ApiModel.builder()
+						.name(apiModelNode.path(Costant.API_MODEL_NAME)
+								.asText())
+						.baseUrl(apiModelNode.path(Costant.API_MODEL_BASEURL)
+								.asText())
+						.endpoint(apiModelNode.path(Costant.API_MODEL_ENDPOINT)
+								.asText())
+						.method(apiModelNode.path(Costant.API_MODEL_METHOD)
+								.asText())
+						.apiList(apiList).build();
+
+				if (!apiModelNode.findPath(Costant.API_MODEL_ISMOCKED)
+						.isMissingNode())
+					apiModel.setIsMocked(apiModelNode
+							.path(Costant.API_MODEL_ISMOCKED).asBoolean());
+
+				apiModelService.insertApiModel(apiModel);
 			}
+			apiModelList.add(apiModel);
+			apiList.setApiModels(apiModelList);
 		}
 	}
 
 	public String moduleDefaultsTest(JsonNode mdjNode, String jsonPath,
 			String rootName) {
-		String protocol = "https";
+		String[] moduleDefaultProtocol = Costant.getModuleDefaultProtocol();
+		String protocol = moduleDefaultProtocol[0];
 		String rootNodePath = extractVariablePath(jsonPath, rootName);
 		String validHost = validHostSelector(rootNodePath);
 		Integer fieldCounter = 0;
@@ -174,7 +231,7 @@ public class DataParseService {
 			mdjNode.findPath(validHost);
 			Boolean isHostMissing = mdjNode.findPath(validHost).isValueNode();
 			if (validHost.equals(validHosts[1])) {
-				protocol = "http";
+				protocol = moduleDefaultProtocol[1];
 			}
 
 			Boolean isProtocolMissing = mdjNode.findPath(protocol)
@@ -186,20 +243,15 @@ public class DataParseService {
 			Boolean isSecurityMissing = mdjNode
 					.findPath(Costant.MODULE_DEFAULT_SECURITY).isValueNode();
 
-			log.debug(
-					"isHostMissing, isProtocolMissing, isBaseUrlMissing, isSecurityMissing  {} - {} - {} - {}",
-					isHostMissing, isProtocolMissing, isBaseUrlMissing,
-					isSecurityMissing);
-
 			if (Boolean.FALSE.equals(isHostMissing)
 					&& Boolean.FALSE.equals(isProtocolMissing)
 					&& Boolean.FALSE.equals(isBaseUrlMissing)
 					&& Boolean.FALSE.equals(isSecurityMissing)) {
-				return "moduleDefaults validate";
+				return Costant.JSON_VALIDATED;
 			}
 		}
 
-		return "moduleDefaults not validate";
+		return Costant.JSON_NOT_VALIDATED;
 	}
 
 	public static String extractVariablePath(String filePath, String rootName) {
@@ -214,22 +266,22 @@ public class DataParseService {
 	public static String validHostSelector(String selectedPath) {
 		String url;
 		switch (selectedPath) {
-			case "\\xdce-module-tbgtee\\apicatalog\\tbgtee\\api.json" :
+			case Costant.COMPLETE_PATH_NOT_ENV :
 				url = validHosts[0];
 				break;
-			case "\\xdce-module-tbgtee\\env\\local\\apicatalog\\tbgtee\\api.json" :
+			case Costant.COMPLETE_PATH_LOCAL :
 				url = validHosts[1];
 				break;
-			case "\\xdce-module-tbgtee\\env\\prod\\apicatalog\\tbgtee\\api.json" :
+			case Costant.COMPLETE_PATH_PROD :
 				url = validHosts[2];
 				break;
-			case "\\xdce-module-tbgtee\\env\\svil\\apicatalog\\tbgtee\\api.json" :
+			case Costant.COMPLETE_PATH_SVIL :
 				url = validHosts[3];
 				break;
-			case "\\xdce-module-tbgtee\\env\\test\\apicatalog\\tbgtee\\api.json" :
+			case Costant.COMPLETE_PATH_TEST :
 				url = validHosts[4];
 				break;
-			case "\\xdce-module-tbgtee\\env\\utes\\apicatalog\\tbgtee\\api.json" :
+			case Costant.COMPLETE_PATH_UTES :
 				url = validHosts[5];
 				break;
 			default :
@@ -239,22 +291,24 @@ public class DataParseService {
 		return url;
 	}
 
-	public List<JsonNode> apiListTest(JsonNode apiListNode) {
-		Entry<String, JsonNode> singleApi;
+	public String apiListTest(JsonNode apiListNode) {
 		String apiKey;
-		JsonNode apiValue;
-		List<JsonNode> nameList = new ArrayList<>();
-		Iterator<Map.Entry<String, JsonNode>> mdIterator = apiListNode.fields();
-		while (mdIterator.hasNext()) {
-			singleApi = mdIterator.next();
+		String[] apisListName = Costant.getApisListName();
+		boolean isPresent;
+		Entry<String, JsonNode> singleApi;
+
+		Iterator<Map.Entry<String, JsonNode>> apiListIterator = apiListNode
+				.fields();
+
+		while (apiListIterator.hasNext()) {
+			singleApi = apiListIterator.next();
 			apiKey = singleApi.getKey();
-			apiValue = singleApi.getValue();
-			log.info("apiKey: {}", apiKey);
-			if (apiKey.equals("name")) {
-				nameList.add(apiValue);
+			isPresent = Arrays.asList(apisListName).contains(apiKey);
+
+			if (Boolean.FALSE.equals(isPresent)) {
+				return Costant.JSON_NOT_VALIDATED;
 			}
 		}
-
-		return nameList;
+		return Costant.JSON_VALIDATED;
 	}
 }

@@ -2,7 +2,6 @@ package com.zip_project.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,9 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.zip_project.service.ExtractFileService;
-import com.zip_project.service.old.ExtractFileOld;
 import com.zip_project.service.old.word.ExtractFileRepWordOld;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 @ResponseStatus(HttpStatus.OK)
 public class ExtractRest {
 
-	private final ExtractFileOld extractFileOld;
 	private final ExtractFileService extractFileService;
 	private static final String EXTRACTED_EXTRACTED = "FILE EXTRACTED";
 
-	public ExtractRest(ExtractFileOld extractFileOld, ExtractFileService extractFileService) {
-		this.extractFileOld = extractFileOld;
+	public ExtractRest(ExtractFileService extractFileService) {
 		this.extractFileService = extractFileService;
 	}
 
@@ -67,17 +62,17 @@ public class ExtractRest {
 	@ResponseStatus(HttpStatus.CREATED)
 	public String extractFileOld() {
 
-		try {
-			List<JsonNode> extractFileManager = extractFileOld.extractFileManager(null);
-
-			log.info("extractFileManager syze: " + extractFileManager.size());
-			// log.debug("extractFileManager: " + extractFileManager);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			return e.getLocalizedMessage() + " \n " + e.getMessage();
-
-		}
+		// try {
+		// List<JsonNode> extractFileManager =
+		// extractFileOld.extractFileManager(null);
+		//
+		// log.info("extractFileManager syze: " + extractFileManager.size());
+		//
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// return e.getLocalizedMessage() + " \n " + e.getMessage();
+		//
+		// }
 		return EXTRACTED_EXTRACTED;
 	}
 
@@ -85,16 +80,16 @@ public class ExtractRest {
 	@ResponseStatus(HttpStatus.CREATED)
 	public String extractFileOld(File file) {
 
-		try {
-			List<JsonNode> extractFileManager = extractFileOld.extractFileManager(file);
-
-			log.info("extractFileManager syze: " + extractFileManager.size());
-			// log.debug("extractFileManager: " + extractFileManager);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			return e.getLocalizedMessage() + " \n " + e.getMessage();
-		}
+		// try {
+		// List<JsonNode> extractFileManager =
+		// extractFileOld.extractFileManager(file);
+		//
+		// log.info("extractFileManager syze: " + extractFileManager.size());
+		//
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// return e.getLocalizedMessage() + " \n " + e.getMessage();
+		// }
 		return EXTRACTED_EXTRACTED;
 	}
 
@@ -117,7 +112,7 @@ public class ExtractRest {
 	public Integer paramExtractFile(File file) {
 		Integer result = null;
 		try {
-			extractFileService.extractFileManager(file);
+			result = extractFileService.extractFileManager(file);
 		} catch (IOException e) {
 			log.info(e.getLocalizedMessage() + " \n " + e.getMessage());
 		} catch (Exception e) {

@@ -46,7 +46,8 @@ public class SchemaValidationRest {
 	public String validateJson(@RequestParam Integer reportNumber) {
 		String result = "";
 		try {
-			jsonSchemaService.jsonValidation(reportNumber, SCHEMA_PATH);
+			result = jsonSchemaService.jsonValidation(reportNumber,
+					SCHEMA_PATH);
 		} catch (Exception e) {
 			return e.getMessage();
 		}

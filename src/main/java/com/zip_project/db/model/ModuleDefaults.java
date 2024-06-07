@@ -1,6 +1,7 @@
 package com.zip_project.db.model;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -28,20 +29,35 @@ public class ModuleDefaults {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idModuleDefaults;
-	
+
 	private String path;
-	
+
 	private String protocol;
-	
+
 	private String host;
-	
+
 	private String baseUrl;
-	
+
 	private String security;
-	
+
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "idApiList")
 	@JsonManagedReference
 	@JsonIgnore
 	@ToString.Exclude
-	private List<ApiList> apisList;
+	private List<ApiList> apiList;
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(idModuleDefaults);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		ModuleDefaults that = (ModuleDefaults) o;
+		return Objects.equals(idModuleDefaults, that.idModuleDefaults);
+	}
 }

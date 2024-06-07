@@ -22,21 +22,21 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "ApiModels")
 public class ApiModel {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idApiModel;
-	
+
 	private Boolean isMocked;
-	
+
 	private String name;
-	
+
 	private String baseUrl;
-	
+
 	private String endpoint;
-	
+
 	private String method;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "idApiList")
 	@JsonBackReference

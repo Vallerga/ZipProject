@@ -1,6 +1,7 @@
 package com.zip_project.db.model;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,13 +37,28 @@ public class ApiList {
 	private String name;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "idModuleDefault")
+	@JoinColumn(name = "idModuleDefaults")
 	@JsonBackReference
-	private ModuleDefaults moduleDefault;
+	private ModuleDefaults moduleDefaults;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "idApiModel")
 	@JsonManagedReference
 	@JsonIgnore
 	@ToString.Exclude
 	private List<ApiModel> apiModels;
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(idApiList);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		ApiList apiList = (ApiList) o;
+		return Objects.equals(idApiList, apiList.idApiList);
+	}
 }

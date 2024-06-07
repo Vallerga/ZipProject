@@ -82,10 +82,10 @@ public class SchemaValidationService {
 				e.printStackTrace();
 			}
 		}
-		return null;
+		return reportNumber.toString();
 	}
 
-	public String validateSingleFile(Path schemaPath, FileStatus es)
+	public void validateSingleFile(Path schemaPath, FileStatus es)
 			throws MyValidationException {
 		String jsonPath = null;
 
@@ -127,7 +127,6 @@ public class SchemaValidationService {
 			e.printStackTrace();
 			log.info(e.getMessage());
 		}
-		return "";
 	}
 
 	public String validateSingleFileOld(Path jsonPath, Path schemaPath)

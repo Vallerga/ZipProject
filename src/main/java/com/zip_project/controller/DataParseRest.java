@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.zip_project.db.model.ModuleDefaults;
 import com.zip_project.service.DataParseService;
+import com.zip_project.service.DataTestService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,10 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 @ResponseStatus(HttpStatus.OK)
 public class DataParseRest {
 
-	private final DataParseService asyncParseJSON;
+	private final DataParseService dataParseService;
+	private final DataTestService dataTestService;
 
-	public DataParseRest(DataParseService asyncParseJSON) {
-		this.asyncParseJSON = asyncParseJSON;
+	public DataParseRest(DataParseService dataParseService,
+			DataTestService dataTestService) {
+		this.dataParseService = dataParseService;
+		this.dataTestService = dataTestService;
 	}
 
 	@GetMapping("/test")
@@ -34,10 +38,23 @@ public class DataParseRest {
 
 	@GetMapping("/parse")
 	@ResponseStatus(HttpStatus.OK)
-	public List<JsonNode> parseJson(@RequestParam Integer reportNumber) {
-		List<JsonNode> result = new ArrayList<>();
+	public List<ModuleDefaults> parseJson(@RequestParam Integer reportNumber) {
+		List<ModuleDefaults> result = new ArrayList<>();
 		try {
-			result = asyncParseJSON.parseJsonManager(reportNumber);
+			result = dataParseService.parseJsonManager(reportNumber);
+		} catch (Exception e) {
+			log.info(e.getMessage());
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@GetMapping("/datatest")
+	@ResponseStatus(HttpStatus.OK)
+	public List<ModuleDefaults> dataTest(@RequestParam Integer reportNumber) {
+		List<ModuleDefaults> result = new ArrayList<>();
+		try {
+			result = dataTestService.dataTest(reportNumber);
 		} catch (Exception e) {
 			log.info(e.getMessage());
 			e.printStackTrace();
