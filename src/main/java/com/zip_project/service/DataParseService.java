@@ -48,15 +48,15 @@ public class DataParseService {
 		List<FileStatus> statusList = fileStatusService
 				.findByReportNumber(reportNumber);
 
-		for (FileStatus es : statusList) {
+		for (FileStatus fileStatus : statusList) {
 			// the non-environment file is always positioned at the start of the
 			// list
 			try {
 				if (Boolean.FALSE.equals(
-						es.getFilePath().contains(Costant.PATH_NOT_ENV)))
-					moduleDefaultsList.add(0, parseSingleFile(es));
+						fileStatus.getFilePath().contains(Costant.PATH_NOT_ENV)))
+					moduleDefaultsList.add(0, parseSingleFile(fileStatus));
 				else
-					moduleDefaultsList.add(parseSingleFile(es));
+					moduleDefaultsList.add(parseSingleFile(fileStatus));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -64,15 +64,15 @@ public class DataParseService {
 		return moduleDefaultsList;
 	}
 
-	public ModuleDefaults parseSingleFile(FileStatus es) {
+	public ModuleDefaults parseSingleFile(FileStatus fileStatus) {
 		String jsonPath = null;
 		String apiTestResult = "";
 		ModuleDefaults moduleDefaults = null;
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode rootNode = null;
 		try {
-			if (es != null && es.getFilePath() != null) {
-				jsonPath = es.getFilePath();
+			if (fileStatus != null && fileStatus.getFilePath() != null) {
+				jsonPath = fileStatus.getFilePath();
 			} else {
 				throw new MyValidationException(
 						"Error during json validation process");
@@ -80,7 +80,7 @@ public class DataParseService {
 
 			// read the JSON file
 			rootNode = mapper.readTree(new File(jsonPath));
-			String validationResult = es.getJsonValidationStatus();
+			String validationResult = fileStatus.getJsonValidationStatus();
 
 			// extract data from root node
 			if (validationResult.equals(Costant.JSON_VALIDATED)) {
@@ -88,11 +88,11 @@ public class DataParseService {
 						.path(Costant.ROOTNODE_MODULE_DEFAULTS);
 
 				String mdTestResult = moduleDefaultsTest(moduleDefaultsNode,
-						jsonPath, es.getRootName());
+						jsonPath, fileStatus.getRootName());
 
 				if (Objects.equals(mdTestResult, Costant.JSON_VALIDATED)) {
 					moduleDefaults = loadModuleDefault(jsonPath, moduleDefaults,
-							moduleDefaultsNode);
+							moduleDefaultsNode, fileStatus);
 
 					// iterate throw apiListNode
 					JsonNode allApiListNode = rootNode
@@ -116,7 +116,7 @@ public class DataParseService {
 	}
 
 	private ModuleDefaults loadModuleDefault(String jsonPath,
-			ModuleDefaults moduleDefaults, JsonNode moduleDefaultsNode)
+			ModuleDefaults moduleDefaults, JsonNode moduleDefaultsNode, FileStatus fileStatus)
 			throws Exception {
 
 		if (moduleDefaults == null && moduleDefaultsNode == null) {
@@ -136,7 +136,7 @@ public class DataParseService {
 						.path(Costant.MODULE_DEFAULT_NAME_SECURITY).asText())
 				.protocol(moduleDefaultsNode
 						.path(Costant.MODULE_DEFAULT_NAME_PROTOCOL).asText())
-				.apiList(apiList).build();
+				.apiList(apiList).fileStatus(fileStatus).build();
 
 		moduleDefaultService.insertModuleDefault(moduleDefaults);
 
@@ -293,7 +293,7 @@ public class DataParseService {
 
 	public String apiListTest(JsonNode apiListNode) {
 		String apiKey;
-		String[] apisListName = Costant.getApisListName();
+		String[] apiListName = Costant.getApiListName();
 		boolean isPresent;
 		Entry<String, JsonNode> singleApi;
 
@@ -303,7 +303,7 @@ public class DataParseService {
 		while (apiListIterator.hasNext()) {
 			singleApi = apiListIterator.next();
 			apiKey = singleApi.getKey();
-			isPresent = Arrays.asList(apisListName).contains(apiKey);
+			isPresent = Arrays.asList(apiListName).contains(apiKey);
 
 			if (Boolean.FALSE.equals(isPresent)) {
 				return Costant.JSON_NOT_VALIDATED;

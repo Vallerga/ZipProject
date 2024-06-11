@@ -43,4 +43,8 @@ public class ApiModelService {
 	public List<ApiModel> findAll() {
 		return (List<ApiModel>) apiModelDao.findAll();
 	}
+
+	public List<ApiModel> getApiListsByModuleDefaultsId(Long idApiList) {
+		return apiModelDao.findByApiList_idApiList(idApiList);
+	}
 }

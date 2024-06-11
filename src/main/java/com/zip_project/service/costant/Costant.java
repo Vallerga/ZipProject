@@ -62,7 +62,7 @@ public class Costant {
 	public static final String API_LIST_WORKFLOW = "workflow";
 	public static final String API_LIST_ALLEGATI = "allegati";
 	public static final String API_LIST_QUADRO = "contratto-quadro";
-	private static String[] apisListName = {API_LIST_GENERIC, API_LIST_PRATICA,
+	private static String[] apiListName = {API_LIST_GENERIC, API_LIST_PRATICA,
 			API_LIST_MAPPING, API_LIST_WORKFLOW, API_LIST_ALLEGATI, API_LIST_QUADRO};
 
 	// complete file path
@@ -91,11 +91,11 @@ public class Costant {
 		Costant.moduleDefaultHost = moduleDefaultHost;
 	}
 
-	public static String[] getApisListName() {
-		return apisListName;
+	public static String[] getApiListName() {
+		return apiListName;
 	}
 
-	public static void setApisListName(String[] apisListName) {
-		Costant.apisListName = apisListName;
+	public static void setApiListName(String[] apiListName) {
+		Costant.apiListName = apiListName;
 	}
 }

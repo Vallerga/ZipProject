@@ -54,7 +54,7 @@ public class DataParseRest {
 	public List<ModuleDefaults> dataTest(@RequestParam Integer reportNumber) {
 		List<ModuleDefaults> result = new ArrayList<>();
 		try {
-			result = dataTestService.dataTest(reportNumber);
+			dataTestService.dataTest(reportNumber);
 		} catch (Exception e) {
 			log.info(e.getMessage());
 			e.printStackTrace();

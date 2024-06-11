@@ -43,4 +43,9 @@ public class ApiListService {
 	public List<ApiList> findAll() {
 		return (List<ApiList>) apiListDao.findAll();
 	}
+
+	public List<ApiList> getApiListsByModuleDefaultsId(Long idModuleDefaults) {
+		return apiListDao
+				.findByModuleDefaults_IdModuleDefaults(idModuleDefaults);
+	}
 }

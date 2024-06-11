@@ -9,21 +9,17 @@ import com.zip_project.db.model.ApiList;
 import com.zip_project.db.model.ApiModel;
 import com.zip_project.db.model.ModuleDefaults;
 import com.zip_project.service.costant.Costant;
-import com.zip_project.service.crud.FileStatusService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class experimental {
-	private final FileStatusService fileStatusService;
+public class Experimental {
 	private final DataParseService dataParseService;
 
-	public experimental(FileStatusService fileStatusService,
-			DataParseService dataParseService) {
+	public Experimental(DataParseService dataParseService) {
 		this.dataParseService = dataParseService;
-		this.fileStatusService = fileStatusService;
 	}
-	
+
 	public List<ModuleDefaults> dataTest(Integer reportNumber) {
 		Map<String, Map<Integer, List<ApiList>>> allFileApiMap = new HashMap<>();
 		ModuleDefaults moduleDefaults;

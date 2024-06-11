@@ -1,14 +1,20 @@
 package com.zip_project.db.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @Builder
@@ -27,7 +33,7 @@ public class FileStatus {
 	private String rootName;
 
 	private String filePath;
-	
+
 	private Integer reportNumber;
 
 	private String extractFileStatus;
@@ -35,4 +41,9 @@ public class FileStatus {
 	private String jsonValidationStatus;
 
 	private String dataTestStatus;
+
+	@OneToOne(mappedBy = "fileStatus", cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
+	@JsonManagedReference
+	@ToString.Exclude
+	private ModuleDefaults moduleDefaults;
 }

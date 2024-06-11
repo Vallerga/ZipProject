@@ -3,6 +3,7 @@ package com.zip_project.db.model;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -11,7 +12,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,6 +49,11 @@ public class ModuleDefaults {
 	@ToString.Exclude
 	private List<ApiList> apiList;
 
+	@OneToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "idFileStatus")
+	@JsonBackReference
+	private FileStatus fileStatus;
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(idModuleDefaults);
@@ -60,4 +68,5 @@ public class ModuleDefaults {
 		ModuleDefaults that = (ModuleDefaults) o;
 		return Objects.equals(idModuleDefaults, that.idModuleDefaults);
 	}
+
 }

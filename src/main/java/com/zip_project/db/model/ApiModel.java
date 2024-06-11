@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @Builder
@@ -26,19 +27,20 @@ public class ApiModel {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idApiModel;
-
+	@ToString.Exclude
 	private Boolean isMocked;
 
 	private String name;
-
+	@ToString.Exclude
 	private String baseUrl;
-
+	@ToString.Exclude
 	private String endpoint;
-
+	@ToString.Exclude
 	private String method;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "idApiList")
 	@JsonBackReference
+	@ToString.Exclude
 	private ApiList apiList;
 }
