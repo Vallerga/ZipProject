@@ -66,7 +66,7 @@ public class FileStatusService {
 
 	public Map<Long, Map<String, List<ApiModel>>> getApiModelsByReportNumberAndApiListNames(
 			Integer reportNumber) {
-		Map<Long, Map<String, List<ApiModel>>> allFilesMap = new HashMap<>();
+		Map<Long, Map<String, List<ApiModel>>> allFilesApiModelsMap = new HashMap<>();
 
 		List<FileStatus> fileStatuses = fileStatusDao
 				.findByReportNumber(reportNumber);
@@ -82,7 +82,7 @@ public class FileStatusService {
 								moduleDefaults.getIdModuleDefaults());
 
 				for (ApiList apiListSelected : apiListByModuleDefaultId) {
-					for (String apiListName : Costant.getApiListName()) {
+					for (String apiListName : Costant.getApiListNames()) {
 						if (apiListSelected.getName().equals(apiListName)) {
 							List<ApiModel> apiModels = apiModelService
 									.getApiListsByModuleDefaultsId(
@@ -96,10 +96,10 @@ public class FileStatusService {
 						}
 					}
 				}
-				allFilesMap.put(moduleDefaults.getIdModuleDefaults(),
+				allFilesApiModelsMap.put(moduleDefaults.getIdModuleDefaults(),
 						apiModelsByFileMap);
 			}
 		}
-		return allFilesMap;
+		return allFilesApiModelsMap;
 	}
 }

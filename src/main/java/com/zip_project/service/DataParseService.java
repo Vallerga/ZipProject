@@ -18,6 +18,8 @@ import com.zip_project.db.model.ApiModel;
 import com.zip_project.db.model.FileStatus;
 import com.zip_project.db.model.ModuleDefaults;
 import com.zip_project.service.costant.Costant;
+import com.zip_project.service.costant.Costant.CompleteFilePath;
+import com.zip_project.service.costant.Costant.JsonValidation;
 import com.zip_project.service.crud.ApiListService;
 import com.zip_project.service.crud.ApiModelService;
 import com.zip_project.service.crud.FileStatusService;
@@ -52,8 +54,8 @@ public class DataParseService {
 			// the non-environment file is always positioned at the start of the
 			// list
 			try {
-				if (Boolean.FALSE.equals(
-						fileStatus.getFilePath().contains(Costant.PATH_NOT_ENV)))
+				if (Boolean.FALSE.equals(fileStatus.getFilePath()
+						.contains(Costant.FilePath.NOT_ENV.getValue())))
 					moduleDefaultsList.add(0, parseSingleFile(fileStatus));
 				else
 					moduleDefaultsList.add(parseSingleFile(fileStatus));
@@ -66,7 +68,6 @@ public class DataParseService {
 
 	public ModuleDefaults parseSingleFile(FileStatus fileStatus) {
 		String jsonPath = null;
-		String apiTestResult = "";
 		ModuleDefaults moduleDefaults = null;
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode rootNode = null;
@@ -80,27 +81,30 @@ public class DataParseService {
 
 			// read the JSON file
 			rootNode = mapper.readTree(new File(jsonPath));
-			String validationResult = fileStatus.getJsonValidationStatus();
+			JsonValidation validationStatus = fileStatus
+					.getJsonValidationStatus();
 
 			// extract data from root node
-			if (validationResult.equals(Costant.JSON_VALIDATED)) {
+			if (validationStatus.equals(Costant.JsonValidation.VALIDATED)) {
+
 				JsonNode moduleDefaultsNode = rootNode
-						.path(Costant.ROOTNODE_MODULE_DEFAULTS);
+						.path(Costant.RootNodePath.MODULE_DEFAULTS.getValue());
 
-				String mdTestResult = moduleDefaultsTest(moduleDefaultsNode,
-						jsonPath, fileStatus.getRootName());
+				JsonValidation mdTestResult = moduleDefaultsTest(
+						moduleDefaultsNode, jsonPath, fileStatus.getRootName());
 
-				if (Objects.equals(mdTestResult, Costant.JSON_VALIDATED)) {
+				if (Objects.equals(mdTestResult,
+						Costant.JsonValidation.VALIDATED)) {
 					moduleDefaults = loadModuleDefault(jsonPath, moduleDefaults,
 							moduleDefaultsNode, fileStatus);
 
 					// iterate throw apiListNode
 					JsonNode allApiListNode = rootNode
-							.path(Costant.ROOTNODE_APIS);
+							.path(Costant.RootNodePath.APIS.getValue());
 
-					apiTestResult = apiListTest(allApiListNode);
+					JsonValidation apiTestResult = apiListTest(allApiListNode);
 
-					if (apiTestResult.equals(Costant.JSON_VALIDATED))
+					if (apiTestResult.equals(Costant.JsonValidation.VALIDATED))
 						loadApiList(moduleDefaults, allApiListNode);
 				} else {
 					throw new Exception(
@@ -116,8 +120,8 @@ public class DataParseService {
 	}
 
 	private ModuleDefaults loadModuleDefault(String jsonPath,
-			ModuleDefaults moduleDefaults, JsonNode moduleDefaultsNode, FileStatus fileStatus)
-			throws Exception {
+			ModuleDefaults moduleDefaults, JsonNode moduleDefaultsNode,
+			FileStatus fileStatus) throws Exception {
 
 		if (moduleDefaults == null && moduleDefaultsNode == null) {
 			throw new Exception(
@@ -127,15 +131,19 @@ public class DataParseService {
 		List<ApiList> apiList = new ArrayList<>();
 
 		moduleDefaults = ModuleDefaults.builder()
-				.baseUrl(moduleDefaultsNode
-						.path(Costant.MODULE_DEFAULT_NAME_BASEURL).asText())
-				.path(jsonPath)
-				.host(moduleDefaultsNode.path(Costant.MODULE_DEFAULT_NAME_HOST)
+				.baseUrl(moduleDefaultsNode.path(
+						Costant.ModuleDefaultsAttributeName.BASEURL.getValue())
 						.asText())
-				.security(moduleDefaultsNode
-						.path(Costant.MODULE_DEFAULT_NAME_SECURITY).asText())
-				.protocol(moduleDefaultsNode
-						.path(Costant.MODULE_DEFAULT_NAME_PROTOCOL).asText())
+				.path(jsonPath)
+				.host(moduleDefaultsNode.path(
+						Costant.ModuleDefaultsAttributeName.HOST.getValue())
+						.asText())
+				.security(moduleDefaultsNode.path(
+						Costant.ModuleDefaultsAttributeName.SECURITY.getValue())
+						.asText())
+				.protocol(moduleDefaultsNode.path(
+						Costant.ModuleDefaultsAttributeName.PROTOCOL.getValue())
+						.asText())
 				.apiList(apiList).fileStatus(fileStatus).build();
 
 		moduleDefaultService.insertModuleDefault(moduleDefaults);
@@ -154,7 +162,7 @@ public class DataParseService {
 					"Invalid parameter, moduleDefaults can't be null");
 		}
 
-		if (moduleDefaults.getApiList() != null)
+		if (moduleDefaults == null || moduleDefaults.getApiList() != null)
 			apiListContainer = new ArrayList<>();
 		else
 			apiListContainer = moduleDefaults.getApiList();
@@ -176,7 +184,9 @@ public class DataParseService {
 			loadApiModels(apiList, singleApiListNode);
 
 			apiListContainer.add(apiList);
-			moduleDefaults.setApiList(apiListContainer);
+
+			if (moduleDefaults != null)
+				moduleDefaults.setApiList(apiListContainer);
 		}
 	}
 
@@ -192,20 +202,26 @@ public class DataParseService {
 			for (JsonNode apiModelNode : singleApiListNode) {
 
 				apiModel = ApiModel.builder()
-						.name(apiModelNode.path(Costant.API_MODEL_NAME)
+						.name(apiModelNode
+								.path(Costant.ApiModelAttribute.NAME.getValue())
 								.asText())
-						.baseUrl(apiModelNode.path(Costant.API_MODEL_BASEURL)
+						.baseUrl(apiModelNode.path(
+								Costant.ApiModelAttribute.BASEURL.getValue())
 								.asText())
-						.endpoint(apiModelNode.path(Costant.API_MODEL_ENDPOINT)
+						.endpoint(apiModelNode.path(
+								Costant.ApiModelAttribute.ENDPOINT.getValue())
 								.asText())
-						.method(apiModelNode.path(Costant.API_MODEL_METHOD)
+						.method(apiModelNode.path(
+								Costant.ApiModelAttribute.METHOD.getValue())
 								.asText())
 						.apiList(apiList).build();
 
-				if (!apiModelNode.findPath(Costant.API_MODEL_ISMOCKED)
+				if (!apiModelNode
+						.findPath(Costant.ApiModelAttribute.ISMOCKED.getValue())
 						.isMissingNode())
 					apiModel.setIsMocked(apiModelNode
-							.path(Costant.API_MODEL_ISMOCKED).asBoolean());
+							.path(Costant.ApiModelAttribute.ISMOCKED.getValue())
+							.asBoolean());
 
 				apiModelService.insertApiModel(apiModel);
 			}
@@ -214,7 +230,7 @@ public class DataParseService {
 		}
 	}
 
-	public String moduleDefaultsTest(JsonNode mdjNode, String jsonPath,
+	public JsonValidation moduleDefaultsTest(JsonNode mdjNode, String jsonPath,
 			String rootName) {
 		String[] moduleDefaultProtocol = Costant.getModuleDefaultProtocol();
 		String protocol = moduleDefaultProtocol[0];
@@ -227,7 +243,8 @@ public class DataParseService {
 			fieldCounter++;
 		}
 
-		if (Objects.equals(fieldCounter, Costant.MODULE_DEFAULTS_ATTRIBUTE)) {
+		if (validHost != null && Objects.equals(fieldCounter,
+				Costant.MODULE_DEFAULTS_ATTRIBUTE)) {
 			mdjNode.findPath(validHost);
 			Boolean isHostMissing = mdjNode.findPath(validHost).isValueNode();
 			if (validHost.equals(validHosts[1])) {
@@ -242,16 +259,14 @@ public class DataParseService {
 
 			Boolean isSecurityMissing = mdjNode
 					.findPath(Costant.MODULE_DEFAULT_SECURITY).isValueNode();
-
 			if (Boolean.FALSE.equals(isHostMissing)
 					&& Boolean.FALSE.equals(isProtocolMissing)
 					&& Boolean.FALSE.equals(isBaseUrlMissing)
 					&& Boolean.FALSE.equals(isSecurityMissing)) {
-				return Costant.JSON_VALIDATED;
+				return Costant.JsonValidation.VALIDATED;
 			}
 		}
-
-		return Costant.JSON_NOT_VALIDATED;
+		return Costant.JsonValidation.NOT_VALIDATED;
 	}
 
 	public static String extractVariablePath(String filePath, String rootName) {
@@ -264,36 +279,17 @@ public class DataParseService {
 	}
 
 	public static String validHostSelector(String selectedPath) {
-		String url;
-		switch (selectedPath) {
-			case Costant.COMPLETE_PATH_NOT_ENV :
-				url = validHosts[0];
-				break;
-			case Costant.COMPLETE_PATH_LOCAL :
-				url = validHosts[1];
-				break;
-			case Costant.COMPLETE_PATH_PROD :
-				url = validHosts[2];
-				break;
-			case Costant.COMPLETE_PATH_SVIL :
-				url = validHosts[3];
-				break;
-			case Costant.COMPLETE_PATH_TEST :
-				url = validHosts[4];
-				break;
-			case Costant.COMPLETE_PATH_UTES :
-				url = validHosts[5];
-				break;
-			default :
-				url = null;
-				break;
+		for (CompleteFilePath path : CompleteFilePath.values()) {
+			if (path.getValue().equals(selectedPath)) {
+				return path.getValue();
+			}
 		}
-		return url;
+		return null;
 	}
 
-	public String apiListTest(JsonNode apiListNode) {
+	public JsonValidation apiListTest(JsonNode apiListNode) {
 		String apiKey;
-		String[] apiListName = Costant.getApiListName();
+		String[] apiListName = Costant.getApiListNames();
 		boolean isPresent;
 		Entry<String, JsonNode> singleApi;
 
@@ -306,9 +302,9 @@ public class DataParseService {
 			isPresent = Arrays.asList(apiListName).contains(apiKey);
 
 			if (Boolean.FALSE.equals(isPresent)) {
-				return Costant.JSON_NOT_VALIDATED;
+				return Costant.JsonValidation.NOT_VALIDATED;
 			}
 		}
-		return Costant.JSON_VALIDATED;
+		return Costant.JsonValidation.VALIDATED;
 	}
 }

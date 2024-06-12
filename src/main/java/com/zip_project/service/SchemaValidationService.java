@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.zip_project.db.model.FileStatus;
+import com.zip_project.service.costant.Costant.JsonValidation;
 import com.zip_project.service.crud.FileStatusService;
 import com.zip_project.service.exception.MyValidationException;
 
@@ -30,6 +31,97 @@ public class SchemaValidationService {
 	public SchemaValidationService(FileStatusService fileStatusService) {
 		this.fileStatusService = fileStatusService;
 	}
+
+	public String jsonValidation(Integer reportNumber, Path schemaPath) {
+		// extract files associated with a specific report
+		List<FileStatus> statusList = fileStatusService
+				.findByReportNumber(reportNumber);
+
+		for (FileStatus fileStatus : statusList) {
+			try {
+				validateSingleFile(schemaPath, fileStatus);
+			} catch (MyValidationException e) {
+				e.printStackTrace();
+			}
+		}
+		return reportNumber.toString();
+	}
+
+	public void validateSingleFile(Path schemaPath, FileStatus fileStatus)
+			throws MyValidationException {
+		String jsonPath = null;
+
+		try {
+			if (fileStatus != null && fileStatus.getFilePath() != null)
+				jsonPath = fileStatus.getFilePath();
+			else
+				throw new MyValidationException(
+						"Error during json validation process");
+
+			// load the schema data from the local file system
+			String schema = new String(Files.readAllBytes(schemaPath));
+			String jsonContent = new String(
+					Files.readAllBytes(Path.of(jsonPath)));
+
+			// initialize a SchemaStore
+			SchemaStore schemaStore = new SchemaStore();
+
+			// load the schema
+			Schema schemaLoaded = schemaStore.loadSchemaJson(schema);
+
+			// create a validator
+			Validator validator = new Validator();
+
+			// validate the JSON content (this will throw an exception if
+			// invalid)
+			validator.validateJson(schemaLoaded, jsonContent);
+
+			// update file validation status
+			fileStatus.setJsonValidationStatus(JsonValidation.VALIDATED);
+			fileStatusService.updateFileStatus(fileStatus);
+		} catch (SchemaException e) {
+			fileStatus.setJsonValidationStatus(JsonValidation.NOT_VALIDATED);
+			fileStatusService.updateFileStatus(fileStatus);
+			throw new MyValidationException(e.getMessage());
+		} catch (IOException e) {
+			fileStatus.setJsonValidationStatus(JsonValidation.NOT_VALIDATED);
+			fileStatusService.updateFileStatus(fileStatus);
+			e.printStackTrace();
+			log.info(e.getMessage());
+		}
+	}
+
+	public String validateSingleFileOld(Path jsonPath, Path schemaPath)
+			throws MyValidationException {
+
+		try {
+			// load the schema data from the local file system
+			String schema = new String(Files.readAllBytes(schemaPath));
+			String jsonContent = new String(Files.readAllBytes(jsonPath));
+
+			// initialize a SchemaStore
+			SchemaStore schemaStore = new SchemaStore();
+
+			// load the schema
+			Schema schemaLoaded = schemaStore.loadSchemaJson(schema);
+
+			// create a validator
+			Validator validator = new Validator();
+
+			// validate the JSON content (this will throw an exception if
+			// invalid)
+			validator.validateJson(schemaLoaded, jsonContent);
+
+		} catch (SchemaException e) {
+			throw new MyValidationException(e.getMessage());
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.info(e.getMessage());
+		}
+		return "";
+	}
+	
+
 
 	public void jsonValidationTest() throws MyValidationException {
 
@@ -68,94 +160,5 @@ public class SchemaValidationService {
 			e.printStackTrace();
 			log.info(e.getMessage());
 		}
-	}
-
-	public String jsonValidation(Integer reportNumber, Path schemaPath) {
-		// extract files associated with a specific report
-		List<FileStatus> statusList = fileStatusService
-				.findByReportNumber(reportNumber);
-
-		for (FileStatus es : statusList) {
-			try {
-				validateSingleFile(schemaPath, es);
-			} catch (MyValidationException e) {
-				e.printStackTrace();
-			}
-		}
-		return reportNumber.toString();
-	}
-
-	public void validateSingleFile(Path schemaPath, FileStatus es)
-			throws MyValidationException {
-		String jsonPath = null;
-
-		try {
-			if (es != null && es.getFilePath() != null)
-				jsonPath = es.getFilePath();
-			else
-				throw new MyValidationException(
-						"Error during json validation process");
-
-			// load the schema data from the local file system
-			String schema = new String(Files.readAllBytes(schemaPath));
-			String jsonContent = new String(
-					Files.readAllBytes(Path.of(jsonPath)));
-
-			// initialize a SchemaStore
-			SchemaStore schemaStore = new SchemaStore();
-
-			// load the schema
-			Schema schemaLoaded = schemaStore.loadSchemaJson(schema);
-
-			// create a validator
-			Validator validator = new Validator();
-
-			// validate the JSON content (this will throw an exception if
-			// invalid)
-			validator.validateJson(schemaLoaded, jsonContent);
-
-			// update file validation status
-			es.setJsonValidationStatus("validated");
-			fileStatusService.updateFileStatus(es);
-		} catch (SchemaException e) {
-			es.setJsonValidationStatus("failed");
-			fileStatusService.updateFileStatus(es);
-			throw new MyValidationException(e.getMessage());
-		} catch (IOException e) {
-			es.setJsonValidationStatus("failed");
-			fileStatusService.updateFileStatus(es);
-			e.printStackTrace();
-			log.info(e.getMessage());
-		}
-	}
-
-	public String validateSingleFileOld(Path jsonPath, Path schemaPath)
-			throws MyValidationException {
-
-		try {
-			// load the schema data from the local file system
-			String schema = new String(Files.readAllBytes(schemaPath));
-			String jsonContent = new String(Files.readAllBytes(jsonPath));
-
-			// initialize a SchemaStore
-			SchemaStore schemaStore = new SchemaStore();
-
-			// load the schema
-			Schema schemaLoaded = schemaStore.loadSchemaJson(schema);
-
-			// create a validator
-			Validator validator = new Validator();
-
-			// validate the JSON content (this will throw an exception if
-			// invalid)
-			validator.validateJson(schemaLoaded, jsonContent);
-
-		} catch (SchemaException e) {
-			throw new MyValidationException(e.getMessage());
-		} catch (IOException e) {
-			e.printStackTrace();
-			log.info(e.getMessage());
-		}
-		return "";
 	}
 }

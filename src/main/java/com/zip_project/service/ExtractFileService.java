@@ -18,6 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.zip_project.db.model.FileStatus;
+import com.zip_project.service.costant.Costant;
+import com.zip_project.service.costant.Costant.JsonValidation;
+import com.zip_project.service.costant.Costant.extractStatus;
 import com.zip_project.service.crud.FileStatusService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +68,7 @@ public class ExtractFileService {
 	private void iterateStreamFile(byte[] zipStreamBuffer, ZipInputStream zis,
 			Path resourcePath, ZipEntry zipEntry, Integer numReport,
 			String rootName) throws IOException {
-		FileStatus es = null;
+		FileStatus fileStatus= null;
 		while (zipEntry != null) {
 			Path newFilePath = newFile(resourcePath, zipEntry);
 
@@ -82,8 +85,9 @@ public class ExtractFileService {
 					Files.createDirectories(parent);
 				}
 
-				es = extractStatusManager(newFilePath, "initialized", null,
-						numReport, rootName);
+				fileStatus = extractStatusManager(newFilePath,
+						Costant.extractStatus.INITIALIZED, null, numReport,
+						rootName);
 
 				// write file content
 				try (FileOutputStream fos = new FileOutputStream(
@@ -95,8 +99,8 @@ public class ExtractFileService {
 					}
 				}
 
-				extractStatusManager(newFilePath, "created", es, numReport,
-						rootName);
+				extractStatusManager(newFilePath, Costant.extractStatus.CREATED,
+						fileStatus, numReport, rootName);
 			}
 			zipEntry = zis.getNextEntry();
 		}
@@ -154,41 +158,43 @@ public class ExtractFileService {
 		return rootName;
 	}
 
-	public FileStatus extractStatusManager(Path filePath, String status,
-			FileStatus paramES, Integer numReport, String rootName) {
-		FileStatus es = null;
-		Optional<FileStatus> optionalES = Optional.ofNullable(paramES);
-		Boolean paramNotNull = optionalES.isPresent();
+	public FileStatus extractStatusManager(Path filePath,
+			extractStatus extractStatus, FileStatus paramES,
+			Integer numReport, String rootName) {
+		FileStatus fileStatus = null;
+		Optional<FileStatus> optionalFileStatus = Optional.ofNullable(paramES);
+		Boolean paramNotNull = optionalFileStatus.isPresent();
 		List<FileStatus> esList;
 
 		if (Boolean.TRUE.equals(paramNotNull)) {
 			esList = fileStatusService.findByfilePath(paramES.getFilePath());
 			paramES.setIdFileStatus(esList.get(0).getIdFileStatus());
 			fileStatusService.insertFileStatus(paramES);
-			return es;
+			return fileStatus;
 		} else if (filePath != null) {
-			es = FileStatus.builder()
+			fileStatus = FileStatus.builder()
 					.fileName(filePath.getFileName().toString())
 					.rootName(rootName).filePath(filePath.toString())
-					.reportNumber(numReport).extractFileStatus(status)
-					.jsonValidationStatus("not_validated")
-					.dataTestStatus("not_tested").build();
-			log.debug("EXTRACT STATUS: {}", es);
+					.reportNumber(numReport)
+					.extractStatus(extractStatus)
+					.jsonValidationStatus(JsonValidation.NOT_VALIDATED)
+					.dataTestStatus(Costant.testStatus.NOT_TESTED).build();
+			log.debug("EXTRACT STATUS: {}", fileStatus);
 
-			fileStatusService.insertFileStatus(es);
+			fileStatusService.insertFileStatus(fileStatus);
 		} else {
 			log.debug("Extract Status not created, filePath equal Null");
 		}
-		return es;
+		return fileStatus;
 	}
 
 	public Integer generateNumReport() {
 		Integer numReport = 0;
-		List<FileStatus> listaStatus = fileStatusService.findAll();
-		for (FileStatus es : listaStatus) {
-			if (es != null && es.getReportNumber() != null
-					&& es.getReportNumber() > numReport) {
-				numReport = es.getReportNumber();
+		List<FileStatus> fileStatusList = fileStatusService.findAll();
+		for (FileStatus fileStatus : fileStatusList) {
+			if (fileStatus != null && fileStatus.getReportNumber() != null
+					&& fileStatus.getReportNumber() > numReport) {
+				numReport = fileStatus.getReportNumber();
 			}
 		}
 		if (numReport != null) {

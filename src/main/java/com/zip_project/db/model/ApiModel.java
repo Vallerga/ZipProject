@@ -31,11 +31,8 @@ public class ApiModel {
 	private Boolean isMocked;
 
 	private String name;
-	@ToString.Exclude
 	private String baseUrl;
-	@ToString.Exclude
 	private String endpoint;
-	@ToString.Exclude
 	private String method;
 
 	@ManyToOne(fetch = FetchType.EAGER)

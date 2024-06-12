@@ -13,5 +13,10 @@
     "name": "json.schema.path",
     "type": "java.lang.String",
     "description": "Standard schema accepted for Api Json"
+  },
+  {
+    "name": "json.schema.path",
+    "type": "java.lang.String",
+    "description": "A description for 'json.schema.path'"
   }
 ]}

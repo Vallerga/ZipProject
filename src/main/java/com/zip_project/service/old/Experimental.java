@@ -1,4 +1,4 @@
-package com.zip_project.service;
+package com.zip_project.service.old;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.Map;
 import com.zip_project.db.model.ApiList;
 import com.zip_project.db.model.ApiModel;
 import com.zip_project.db.model.ModuleDefaults;
+import com.zip_project.service.DataParseService;
 import com.zip_project.service.costant.Costant;
 
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,7 @@ public class Experimental {
 
 			// Example of logging the models
 			Map<Integer, List<ApiList>> genericApiListsMap = allFileApiMap
-					.get(Costant.API_LIST_GENERIC);
+					.get(Costant.ApiListName.GENERIC.getValue());
 			if (genericApiListsMap != null) {
 				for (Map.Entry<Integer, List<ApiList>> entry : genericApiListsMap
 						.entrySet()) {
