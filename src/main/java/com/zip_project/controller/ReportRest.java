@@ -7,20 +7,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zip_project.service.DataTestService;
+import com.zip_project.service.ReportService;
+import com.zip_project.service.exception.CustomException;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/datatest")
+@RequestMapping("/report")
 @ResponseStatus(HttpStatus.OK)
-public class DataTestRest {
+public class ReportRest {
 
-	private final DataTestService dataTestService;
+	private final ReportService reportService;
 
-	public DataTestRest(DataTestService dataTestService) {
-		this.dataTestService = dataTestService;
+	public ReportRest(ReportService reportService) {
+		this.reportService = reportService;
 	}
 
 	@GetMapping("/test")
@@ -29,12 +30,15 @@ public class DataTestRest {
 		return "test connection";
 	}
 
-	@GetMapping("/datatest")
+	@GetMapping("/compile")
 	@ResponseStatus(HttpStatus.OK)
 	public void parseJson(@RequestParam Integer reportNumber) {
 		try {
-			dataTestService.dataTest(reportNumber);
-		} catch (Exception e) {
+			reportService.compileReport(reportNumber);
+		} catch (CustomException e) {
+			log.info(e.getMessage());
+			e.printStackTrace();
+		}catch (Exception e) {
 			log.info(e.getMessage());
 			e.printStackTrace();
 		}

@@ -21,8 +21,8 @@ public class ApiListService {
 		return "API LIST SAVED";
 	}
 
-	public String updateApiList(ApiList md) {
-		apiListDao.save(md);
+	public String updateApiList(ApiList apiList) {
+		apiListDao.save(apiList);
 		return "API LIST UPDATED";
 	}
 

@@ -28,13 +28,13 @@ public class FileStatusService {
 		this.apiModelService = apiModelService;
 	}
 
-	public String insertFileStatus(FileStatus extractStatus) {
-		fileStatusDao.save(extractStatus);
+	public String insertFileStatus(FileStatus fileStatus) {
+		fileStatusDao.save(fileStatus);
 		return "EXTRACT STATUS SAVED";
 	}
 
-	public String updateFileStatus(FileStatus md) {
-		fileStatusDao.save(md);
+	public String updateFileStatus(FileStatus fileStatus) {
+		fileStatusDao.save(fileStatus);
 		return "EXTRACT STATUS UPDATED";
 	}
 

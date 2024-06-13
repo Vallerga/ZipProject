@@ -15,12 +15,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.zip_project.db.model.FileStatus;
 import com.zip_project.service.costant.Costant;
+import com.zip_project.service.costant.Costant.ExtractStatus;
 import com.zip_project.service.costant.Costant.JsonValidation;
-import com.zip_project.service.costant.Costant.extractStatus;
 import com.zip_project.service.crud.FileStatusService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,9 +41,10 @@ public class ExtractFileService {
 	@Value("${folder.source}")
 	private String sourceFolder;
 
-	public Integer extractFileManager(File paramFile) throws IOException {
+	public String extractFileManager(File paramFile)
+			throws IOException, DataAccessException {
 		byte[] zipStreamBuffer = new byte[1024];
-		ZipInputStream zis = null;
+		ZipInputStream zipInputStream = null;
 		ZipEntry zipEntry;
 		Integer numReport = generateNumReport();
 
@@ -51,24 +53,21 @@ public class ExtractFileService {
 		String rootName = generateRootName(paramFile, localSourceFile);
 		Path resourcePath = Paths.get(destinationFolder + rootName);
 
-		try {
-			zis = loadLocalOrParamFile(paramFile, localSourceFile);
+		zipInputStream = loadLocalOrParamFile(paramFile, localSourceFile);
 
-			zipEntry = zis.getNextEntry();
+		zipEntry = zipInputStream.getNextEntry();
 
-			iterateStreamFile(zipStreamBuffer, zis, resourcePath, zipEntry,
-					numReport, rootName);
-		} catch (IOException e) {
-			log.error("Error while extracting file: " + e.getMessage());
-			throw e;
-		}
-		return numReport;
+		iterateStreamFile(zipStreamBuffer, zipInputStream, resourcePath,
+				zipEntry, numReport, rootName);
+
+		return numReport.toString();
 	}
 
-	private void iterateStreamFile(byte[] zipStreamBuffer, ZipInputStream zis,
-			Path resourcePath, ZipEntry zipEntry, Integer numReport,
-			String rootName) throws IOException {
-		FileStatus fileStatus= null;
+	private void iterateStreamFile(byte[] zipStreamBuffer,
+			ZipInputStream zipInputStream, Path resourcePath, ZipEntry zipEntry,
+			Integer numReport, String rootName)
+			throws IOException, DataAccessException {
+		FileStatus fileStatus = null;
 		while (zipEntry != null) {
 			Path newFilePath = newFile(resourcePath, zipEntry);
 
@@ -86,7 +85,7 @@ public class ExtractFileService {
 				}
 
 				fileStatus = extractStatusManager(newFilePath,
-						Costant.extractStatus.INITIALIZED, null, numReport,
+						Costant.ExtractStatus.INITIALIZED, null, numReport,
 						rootName);
 
 				// write file content
@@ -94,15 +93,15 @@ public class ExtractFileService {
 						newFilePath.toFile())) {
 
 					int len;
-					while ((len = zis.read(zipStreamBuffer)) > 0) {
+					while ((len = zipInputStream.read(zipStreamBuffer)) > 0) {
 						fos.write(zipStreamBuffer, 0, len);
 					}
 				}
 
-				extractStatusManager(newFilePath, Costant.extractStatus.CREATED,
+				extractStatusManager(newFilePath, Costant.ExtractStatus.CREATED,
 						fileStatus, numReport, rootName);
 			}
-			zipEntry = zis.getNextEntry();
+			zipEntry = zipInputStream.getNextEntry();
 		}
 	}
 
@@ -115,17 +114,13 @@ public class ExtractFileService {
 		Boolean paramIsNull = !isNullFile.isPresent();
 
 		// extract a file from a local source or a provided source
-		try {
-			if (Boolean.TRUE.equals(paramIsNull)) {
-				zis = new ZipInputStream(
-						new FileInputStream(localSourceFile.toFile()));
-			} else {
-				zis = new ZipInputStream(new FileInputStream(paramFile));
-			}
-		} catch (IOException e) {
-			log.error("Error while extracting file: " + e.getMessage());
-			throw e;
+		if (Boolean.TRUE.equals(paramIsNull)) {
+			zis = new ZipInputStream(
+					new FileInputStream(localSourceFile.toFile()));
+		} else {
+			zis = new ZipInputStream(new FileInputStream(paramFile));
 		}
+
 		return zis;
 	}
 
@@ -159,8 +154,8 @@ public class ExtractFileService {
 	}
 
 	public FileStatus extractStatusManager(Path filePath,
-			extractStatus extractStatus, FileStatus paramES,
-			Integer numReport, String rootName) {
+			ExtractStatus extractStatus, FileStatus paramES, Integer numReport,
+			String rootName) throws DataAccessException {
 		FileStatus fileStatus = null;
 		Optional<FileStatus> optionalFileStatus = Optional.ofNullable(paramES);
 		Boolean paramNotNull = optionalFileStatus.isPresent();
@@ -175,10 +170,10 @@ public class ExtractFileService {
 			fileStatus = FileStatus.builder()
 					.fileName(filePath.getFileName().toString())
 					.rootName(rootName).filePath(filePath.toString())
-					.reportNumber(numReport)
-					.extractStatus(extractStatus)
+					.reportNumber(numReport).extractStatus(extractStatus)
 					.jsonValidationStatus(JsonValidation.NOT_VALIDATED)
-					.dataTestStatus(Costant.testStatus.NOT_TESTED).build();
+					.testStatus(Costant.TestStatus.NOT_TESTED)
+					.reportStatus(Costant.ReportStatus.ABSENT).build();
 			log.debug("EXTRACT STATUS: {}", fileStatus);
 
 			fileStatusService.insertFileStatus(fileStatus);
@@ -188,7 +183,7 @@ public class ExtractFileService {
 		return fileStatus;
 	}
 
-	public Integer generateNumReport() {
+	public Integer generateNumReport() throws DataAccessException {
 		Integer numReport = 0;
 		List<FileStatus> fileStatusList = fileStatusService.findAll();
 		for (FileStatus fileStatus : fileStatusList) {

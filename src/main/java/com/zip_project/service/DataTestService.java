@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.zip_project.db.model.ApiModel;
 import com.zip_project.db.model.FileStatus;
 import com.zip_project.service.costant.Costant;
-import com.zip_project.service.costant.Costant.testStatus;
+import com.zip_project.service.costant.Costant.TestStatus;
 import com.zip_project.service.crud.FileStatusService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,16 +40,16 @@ public class DataTestService {
 			
 			sortApiListByName(compareNameApiListMap);
 			
-			updateFileStatus(statusList, testStatus.TESTED);
+			updateFileStatus(statusList, TestStatus.TESTED);
 		} catch (Exception e) {
-			updateFileStatus(statusList, testStatus.NOT_TESTED);
+			updateFileStatus(statusList, TestStatus.NOT_TESTED);
 			e.printStackTrace();
 		}
 	}
 	
-	private void updateFileStatus(List<FileStatus> statusList, testStatus value) {
+	private void updateFileStatus(List<FileStatus> statusList, TestStatus value) {
 		for(FileStatus fileStatus : statusList) {
-			fileStatus.setDataTestStatus(value);
+			fileStatus.setTestStatus(value);
 			fileStatusService.updateFileStatus(fileStatus);
 		}
 }

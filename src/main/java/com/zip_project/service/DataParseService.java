@@ -24,7 +24,7 @@ import com.zip_project.service.crud.ApiListService;
 import com.zip_project.service.crud.ApiModelService;
 import com.zip_project.service.crud.FileStatusService;
 import com.zip_project.service.crud.ModuleDefaultService;
-import com.zip_project.service.exception.MyValidationException;
+import com.zip_project.service.exception.CustomException;
 
 @Service
 public class DataParseService {
@@ -75,8 +75,8 @@ public class DataParseService {
 			if (fileStatus != null && fileStatus.getFilePath() != null) {
 				jsonPath = fileStatus.getFilePath();
 			} else {
-				throw new MyValidationException(
-						"Error during json validation process");
+				throw new CustomException(
+						"Error during json validation process", null);
 			}
 
 			// read the JSON file

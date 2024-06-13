@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.zip_project.db.model.FileStatus;
 import com.zip_project.service.costant.Costant.JsonValidation;
 import com.zip_project.service.crud.FileStatusService;
-import com.zip_project.service.exception.MyValidationException;
+import com.zip_project.service.exception.SchemaValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 import net.jimblackler.jsonschemafriend.Schema;
@@ -40,7 +40,7 @@ public class SchemaValidationService {
 		for (FileStatus fileStatus : statusList) {
 			try {
 				validateSingleFile(schemaPath, fileStatus);
-			} catch (MyValidationException e) {
+			} catch (SchemaValidationException e) {
 				e.printStackTrace();
 			}
 		}
@@ -48,14 +48,14 @@ public class SchemaValidationService {
 	}
 
 	public void validateSingleFile(Path schemaPath, FileStatus fileStatus)
-			throws MyValidationException {
+			throws SchemaValidationException {
 		String jsonPath = null;
 
 		try {
 			if (fileStatus != null && fileStatus.getFilePath() != null)
 				jsonPath = fileStatus.getFilePath();
 			else
-				throw new MyValidationException(
+				throw new SchemaValidationException(
 						"Error during json validation process");
 
 			// load the schema data from the local file system
@@ -82,7 +82,7 @@ public class SchemaValidationService {
 		} catch (SchemaException e) {
 			fileStatus.setJsonValidationStatus(JsonValidation.NOT_VALIDATED);
 			fileStatusService.updateFileStatus(fileStatus);
-			throw new MyValidationException(e.getMessage());
+			throw new SchemaValidationException(e.getMessage());
 		} catch (IOException e) {
 			fileStatus.setJsonValidationStatus(JsonValidation.NOT_VALIDATED);
 			fileStatusService.updateFileStatus(fileStatus);
@@ -92,7 +92,7 @@ public class SchemaValidationService {
 	}
 
 	public String validateSingleFileOld(Path jsonPath, Path schemaPath)
-			throws MyValidationException {
+			throws SchemaValidationException {
 
 		try {
 			// load the schema data from the local file system
@@ -113,7 +113,7 @@ public class SchemaValidationService {
 			validator.validateJson(schemaLoaded, jsonContent);
 
 		} catch (SchemaException e) {
-			throw new MyValidationException(e.getMessage());
+			throw new SchemaValidationException(e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace();
 			log.info(e.getMessage());
@@ -123,7 +123,7 @@ public class SchemaValidationService {
 	
 
 
-	public void jsonValidationTest() throws MyValidationException {
+	public void jsonValidationTest() throws SchemaValidationException {
 
 		String validJsonLocation = "C:\\sviluppo\\java_workspaces\\Jersey\\ZipProject\\src\\main\\resources\\JsonSchema\\api.json";
 		String notValidJsonLocation = "C:\\sviluppo\\java_workspaces\\Jersey\\ZipProject\\src\\main\\resources\\JsonSchema\\notValidApi.json";
@@ -155,7 +155,7 @@ public class SchemaValidationService {
 			validator.validateJson(schemaLoaded, notValidJsonContent);
 
 		} catch (SchemaException e) {
-			throw new MyValidationException(e.getMessage());
+			throw new SchemaValidationException(e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace();
 			log.info(e.getMessage());

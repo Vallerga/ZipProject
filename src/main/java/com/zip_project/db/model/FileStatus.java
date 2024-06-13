@@ -1,9 +1,10 @@
 package com.zip_project.db.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.zip_project.service.costant.Costant.ExtractStatus;
 import com.zip_project.service.costant.Costant.JsonValidation;
-import com.zip_project.service.costant.Costant.extractStatus;
-import com.zip_project.service.costant.Costant.testStatus;
+import com.zip_project.service.costant.Costant.ReportStatus;
+import com.zip_project.service.costant.Costant.TestStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -39,11 +40,13 @@ public class FileStatus {
 
 	private Integer reportNumber;
 
-	private extractStatus extractStatus;
+	private ExtractStatus extractStatus;
 
 	private JsonValidation jsonValidationStatus;
 
-	private testStatus dataTestStatus;
+	private TestStatus testStatus;
+
+	private ReportStatus reportStatus;
 
 	@OneToOne(mappedBy = "fileStatus", cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
 	@JsonManagedReference
