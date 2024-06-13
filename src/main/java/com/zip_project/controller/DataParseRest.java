@@ -1,8 +1,10 @@
 package com.zip_project.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zip_project.db.model.ModuleDefaults;
 import com.zip_project.service.DataParseService;
 import com.zip_project.service.DataTestService;
+import com.zip_project.service.exception.DataParsingException;
+import com.zip_project.service.exception.DatabaseOperationException;
+import com.zip_project.service.exception.TestExecutionException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,27 +42,43 @@ public class DataParseRest {
 
 	@GetMapping("/parse")
 	@ResponseStatus(HttpStatus.OK)
-	public List<ModuleDefaults> parseJson(@RequestParam Integer reportNumber) {
-		List<ModuleDefaults> result = new ArrayList<>();
+	public String parseJson(@RequestParam Integer reportNumber) {
 		try {
-			result = dataParseService.parseJsonManager(reportNumber);
+			dataParseService.parseJsonManager(reportNumber);
+		} catch (IOException e) {
+			throw new DataParsingException(
+					"Data parsing error: " + e.getMessage());
+		} catch (DataAccessException e) {
+			throw new DatabaseOperationException(
+					"An error occurred while accessing the database: "
+							+ e.getMessage());
 		} catch (Exception e) {
 			log.info(e.getMessage());
-			e.printStackTrace();
+			return e.getMessage();
 		}
-		return result;
+		return "data parsed";
 	}
 
 	@GetMapping("/datatest")
 	@ResponseStatus(HttpStatus.OK)
-	public List<ModuleDefaults> dataTest(@RequestParam Integer reportNumber) {
-		List<ModuleDefaults> result = new ArrayList<>();
+	public List<String> dataTest(@RequestParam Integer reportNumber) {
+		List<String> errorList = new ArrayList<>();
 		try {
-			dataTestService.dataTest(reportNumber);
+			errorList = dataTestService.dataTest(reportNumber);
+		} catch (TestExecutionException e) {
+			log.info(e.getMessage());
+			throw new TestExecutionException(
+					"Data parsing error: " + e.getMessage());
+		} catch (DataParsingException e) {
+			throw new DataParsingException(
+					"Test api validation failed: " + e.getMessage());
+		} catch (DataAccessException e) {
+			throw new DatabaseOperationException(
+					"An error occurred while accessing the database: "
+							+ e.getMessage());
 		} catch (Exception e) {
 			log.info(e.getMessage());
-			e.printStackTrace();
 		}
-		return result;
+		return errorList;
 	}
 }

@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.zip_project.db.model.FileStatus;
@@ -14,13 +15,11 @@ import com.zip_project.service.costant.Costant.JsonValidation;
 import com.zip_project.service.crud.FileStatusService;
 import com.zip_project.service.exception.SchemaValidationException;
 
-import lombok.extern.slf4j.Slf4j;
 import net.jimblackler.jsonschemafriend.Schema;
 import net.jimblackler.jsonschemafriend.SchemaException;
 import net.jimblackler.jsonschemafriend.SchemaStore;
 import net.jimblackler.jsonschemafriend.Validator;
 
-@Slf4j
 @Service
 public class SchemaValidationService {
 	@Value("${json.schema.path}")
@@ -32,23 +31,21 @@ public class SchemaValidationService {
 		this.fileStatusService = fileStatusService;
 	}
 
-	public String jsonValidation(Integer reportNumber, Path schemaPath) {
+	public String jsonValidation(Integer reportNumber, Path schemaPath)
+			throws IOException, SchemaValidationException, DataAccessException {
 		// extract files associated with a specific report
 		List<FileStatus> statusList = fileStatusService
 				.findByReportNumber(reportNumber);
 
 		for (FileStatus fileStatus : statusList) {
-			try {
-				validateSingleFile(schemaPath, fileStatus);
-			} catch (SchemaValidationException e) {
-				e.printStackTrace();
-			}
+			validateSingleFile(schemaPath, fileStatus);
+
 		}
 		return reportNumber.toString();
 	}
 
 	public void validateSingleFile(Path schemaPath, FileStatus fileStatus)
-			throws SchemaValidationException {
+			throws IOException, SchemaValidationException, DataAccessException {
 		String jsonPath = null;
 
 		try {
@@ -86,44 +83,12 @@ public class SchemaValidationService {
 		} catch (IOException e) {
 			fileStatus.setJsonValidationStatus(JsonValidation.NOT_VALIDATED);
 			fileStatusService.updateFileStatus(fileStatus);
-			e.printStackTrace();
-			log.info(e.getMessage());
+			throw new IOException(e.getMessage());
 		}
 	}
 
-	public String validateSingleFileOld(Path jsonPath, Path schemaPath)
-			throws SchemaValidationException {
-
-		try {
-			// load the schema data from the local file system
-			String schema = new String(Files.readAllBytes(schemaPath));
-			String jsonContent = new String(Files.readAllBytes(jsonPath));
-
-			// initialize a SchemaStore
-			SchemaStore schemaStore = new SchemaStore();
-
-			// load the schema
-			Schema schemaLoaded = schemaStore.loadSchemaJson(schema);
-
-			// create a validator
-			Validator validator = new Validator();
-
-			// validate the JSON content (this will throw an exception if
-			// invalid)
-			validator.validateJson(schemaLoaded, jsonContent);
-
-		} catch (SchemaException e) {
-			throw new SchemaValidationException(e.getMessage());
-		} catch (IOException e) {
-			e.printStackTrace();
-			log.info(e.getMessage());
-		}
-		return "";
-	}
-	
-
-
-	public void jsonValidationTest() throws SchemaValidationException {
+	public void jsonValidationTest()
+			throws SchemaValidationException, IOException {
 
 		String validJsonLocation = "C:\\sviluppo\\java_workspaces\\Jersey\\ZipProject\\src\\main\\resources\\JsonSchema\\api.json";
 		String notValidJsonLocation = "C:\\sviluppo\\java_workspaces\\Jersey\\ZipProject\\src\\main\\resources\\JsonSchema\\notValidApi.json";
@@ -157,8 +122,7 @@ public class SchemaValidationService {
 		} catch (SchemaException e) {
 			throw new SchemaValidationException(e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
-			log.info(e.getMessage());
+			throw new IOException(e.getMessage());
 		}
 	}
 }

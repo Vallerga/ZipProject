@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.zip_project.db.model.ApiModel;
@@ -13,6 +14,9 @@ import com.zip_project.db.model.FileStatus;
 import com.zip_project.service.costant.Costant;
 import com.zip_project.service.costant.Costant.TestStatus;
 import com.zip_project.service.crud.FileStatusService;
+import com.zip_project.service.exception.DataParsingException;
+import com.zip_project.service.exception.DatabaseOperationException;
+import com.zip_project.service.exception.TestExecutionException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,34 +29,42 @@ public class DataTestService {
 	public DataTestService(FileStatusService fileStatusService) {
 		this.fileStatusService = fileStatusService;
 	}
-	public void dataTest(Integer reportNumber) {
+	public List<String> dataTest(Integer reportNumber)
+			throws TestExecutionException, DataAccessException,
+			DataParsingException {
+		List<String> errorList = new ArrayList<>();
 		Map<String, Map<Long, List<ApiModel>>> compareNameApiListMap = new HashMap<>();
-		Map<Long, Map<String, List<ApiModel>>> allFilesMap = fileStatusService
-				.getApiModelsByReportNumberAndApiListNames(reportNumber);
-		
-		List<FileStatus> statusList = fileStatusService
-				.findByReportNumber(reportNumber);
-		
+
 		try {
-			printSingleApiList(allFilesMap);
-			
+			List<FileStatus> statusList = fileStatusService
+					.findByReportNumber(reportNumber);
+			Map<Long, Map<String, List<ApiModel>>> allFilesMap = fileStatusService
+					.getApiModelsByReportNumberAndApiListNames(reportNumber);
+
 			loadCompareNameApiListMap(compareNameApiListMap, allFilesMap);
-			
-			sortApiListByName(compareNameApiListMap);
-			
+
+			sortApiListByName(compareNameApiListMap, errorList);
+
 			updateFileStatus(statusList, TestStatus.TESTED);
-		} catch (Exception e) {
-			updateFileStatus(statusList, TestStatus.NOT_TESTED);
-			e.printStackTrace();
+		} catch (DataAccessException e) {
+			throw new DatabaseOperationException(
+					"An error occurred while accessing the database: file status non accessible.");
+		}
+		return errorList;
+	}
+
+	private void updateFileStatus(List<FileStatus> statusList,
+			TestStatus value) {
+		try {
+			for (FileStatus fileStatus : statusList) {
+				fileStatus.setTestStatus(value);
+				fileStatusService.updateFileStatus(fileStatus);
+			}
+		} catch (DataAccessException e) {
+			throw new DatabaseOperationException(
+					"An error occurred while accessing the database: file status non accessible.");
 		}
 	}
-	
-	private void updateFileStatus(List<FileStatus> statusList, TestStatus value) {
-		for(FileStatus fileStatus : statusList) {
-			fileStatus.setTestStatus(value);
-			fileStatusService.updateFileStatus(fileStatus);
-		}
-}
 	private void loadCompareNameApiListMap(
 			Map<String, Map<Long, List<ApiModel>>> compareNameApiListMap,
 			Map<Long, Map<String, List<ApiModel>>> allFilesMap) {
@@ -88,39 +100,47 @@ public class DataTestService {
 
 		compareNameApiListMap.put(Costant.ApiListName.GENERIC.getValue(),
 				prodGenericMap);
-		compareNameApiListMap.put(Costant.ApiListName.PRATICA.getValue(), praticaMap);
+		compareNameApiListMap.put(Costant.ApiListName.PRATICA.getValue(),
+				praticaMap);
 		compareNameApiListMap.put(Costant.ApiListName.MAPPING.getValue(),
 				prodMappingMap);
-		compareNameApiListMap.put(Costant.ApiListName.WORKFLOW.getValue(), workflowMap);
-		compareNameApiListMap.put(Costant.ApiListName.ALLEGATI.getValue(), allegatiMap);
-		compareNameApiListMap.put(Costant.ApiListName.QUADRO.getValue(), contQuadroMap);
+		compareNameApiListMap.put(Costant.ApiListName.WORKFLOW.getValue(),
+				workflowMap);
+		compareNameApiListMap.put(Costant.ApiListName.ALLEGATI.getValue(),
+				allegatiMap);
+		compareNameApiListMap.put(Costant.ApiListName.QUADRO.getValue(),
+				contQuadroMap);
 	}
 
 	private void sortApiListByName(
-			Map<String, Map<Long, List<ApiModel>>> compareNameApiListMap) throws Exception {
+			Map<String, Map<Long, List<ApiModel>>> compareNameApiListMap,
+			List<String> errorList) throws TestExecutionException {
 		for (Map.Entry<String, Map<Long, List<ApiModel>>> compareNameApiListMapEntry : compareNameApiListMap
 				.entrySet()) {
 			String apiListName = compareNameApiListMapEntry.getKey();
 			Map<Long, List<ApiModel>> apiListByNameMap = compareNameApiListMapEntry
 					.getValue();
-			analizeApiListByName(apiListByNameMap, apiListName);
+			analizeApiListByName(apiListByNameMap, apiListName, errorList);
 		}
 	}
 
-	private void analizeApiListByName(Map<Long, List<ApiModel>> apiListByNameMap,
-			String apiListName) throws Exception {
+	private void analizeApiListByName(
+			Map<Long, List<ApiModel>> apiListByNameMap, String apiListName,
+			List<String> errorList) throws TestExecutionException {
+		String error = "";
 		List<ApiModel> baseApiList = null;
 		List<ApiModel> compareApiList = null;
 		Long baseFileNumber = null;
 		Long compareFileNumber = null;
 		for (Entry<Long, List<ApiModel>> apiListByNameMapEntry : apiListByNameMap
 				.entrySet()) {
-
+			baseFileNumber = apiListByNameMapEntry.getKey();
 			if (apiListByNameMapEntry.getValue() == null) {
-				log.debug("baseApiList: {}", baseApiList);
-				log.debug("compareApiList: {}", compareApiList);
-				log.info("apiListName: " + apiListName);
-				continue;
+				error = "At file number: " + baseFileNumber
+						+ ", apiList named: " + apiListName
+						+ " not match any ApiList name. \n ";
+				errorList.add(error);
+				log.info("missing apiList: " + apiListName);
 			}
 
 			if (apiListByNameMapEntry.getKey() == 1)
@@ -133,24 +153,19 @@ public class DataTestService {
 			else
 				compareApiList = apiListByNameMapEntry.getValue();
 
-			if (compareFileNumber == null && compareApiList == null) {
-				continue;
+			if (compareFileNumber != null && compareApiList != null) {
+				log.info("comparing apiList: " + apiListName);
+
+				apiListComparator(apiListName, baseApiList, compareApiList,
+						baseFileNumber, compareFileNumber, errorList);
 			}
-
-			log.debug("baseApiList: {}", baseApiList);
-			log.debug("compareApiList: {}", compareApiList);
-			log.info("comparing apiList: " + apiListName);
-
-			List<String> resultList = new ArrayList<>();
-
-			apiListComparator(apiListName, baseApiList, compareApiList,
-					baseFileNumber, compareFileNumber, resultList);
 		}
 	}
 
-	private void apiListComparator(String apiListName, List<ApiModel> baseApiList,
-			List<ApiModel> compareApiList, Long baseFileNumber,
-			Long compareFileNumber, List<String> resultList) throws Exception {
+	private void apiListComparator(String apiListName,
+			List<ApiModel> baseApiList, List<ApiModel> compareApiList,
+			Long baseFileNumber, Long compareFileNumber, List<String> errorList)
+			throws TestExecutionException {
 		Boolean result = false;
 
 		for (ApiModel baseApiModel : baseApiList) {
@@ -161,41 +176,15 @@ public class DataTestService {
 			}
 
 			if (Boolean.FALSE.equals(result)) {
-				String error = " Not present:" + baseApiModel.getName();
-				resultList.add(error);
-				throw new Exception("comparison failed, apiList named: "
-						+ apiListName + " at file number: " + baseFileNumber
-						+ " not match any api at file: " + compareFileNumber);
+				String error = "At file number: " + baseFileNumber
+						+ ", apiList named: " + apiListName + "contain Api: "
+						+ baseApiModel.getName()
+						+ " not match any Api at file: " + compareFileNumber
+						+ " \n ";
+				errorList.add(error);
 			}
 			// reset value
 			result = false;
-
-			if (resultList.isEmpty())
-				resultList.add("all comparison success");
-
-			// for (String error : resultList) {
-			// log.info(error);
-			// }
-		}
-	}
-
-	private void printSingleApiList(
-			Map<Long, Map<String, List<ApiModel>>> allFileMap) {
-		for (Map.Entry<Long, Map<String, List<ApiModel>>> singleFileApiModelsMap : allFileMap
-				.entrySet()) {
-			Long fileId = singleFileApiModelsMap.getKey();
-			Map<String, List<ApiModel>> apiModelsListMap = singleFileApiModelsMap
-					.getValue();
-
-			for (Map.Entry<String, List<ApiModel>> apiModelsEntry : apiModelsListMap
-					.entrySet()) {
-				String apiListName = apiModelsEntry.getKey();
-				List<ApiModel> apiModelList = apiModelsEntry.getValue();
-
-				log.debug(
-						"Id ModuleDefaults: {} - ApiList Name: {} - ApiModels: {}",
-						fileId, apiListName, apiModelList);
-			}
 		}
 	}
 }

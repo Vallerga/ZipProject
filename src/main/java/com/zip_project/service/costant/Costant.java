@@ -64,6 +64,21 @@ public class Costant {
 			return value;
 		}
 	}
+	
+	// test validation
+		public enum testValidation {
+			VALIDATED("validated"), NOT_VALIDATED("not_validated");
+
+			private final String value;
+
+			testValidation(String value) {
+				this.value = value;
+			}
+
+			public String getValue() {
+				return value;
+			}
+		}
 
 	// attribute number accepted
 	public static final Integer ROOTNODE_ATTRIBUTE = 2;

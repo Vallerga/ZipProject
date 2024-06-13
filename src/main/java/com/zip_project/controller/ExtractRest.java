@@ -45,7 +45,8 @@ public class ExtractRest {
 					"Error extracting the zip file: " + e.getMessage());
 		} catch (DataAccessException e) {
 			throw new DatabaseOperationException(
-					"An error occurred while accessing the database: " + e.getMessage());
+					"An error occurred while accessing the database: "
+							+ e.getMessage());
 		} catch (Exception e) {
 			log.info(e.getMessage());
 			return e.getMessage();
@@ -64,7 +65,8 @@ public class ExtractRest {
 					"Error extracting the zip file: " + e.getMessage());
 		} catch (DataAccessException e) {
 			throw new DatabaseOperationException(
-					"An error occurred while accessing the database: " + e.getMessage());
+					"An error occurred while accessing the database: "
+							+ e.getMessage());
 		} catch (Exception e) {
 			log.info(e.getMessage());
 			return e.getMessage();

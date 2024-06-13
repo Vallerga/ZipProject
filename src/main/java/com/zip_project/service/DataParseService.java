@@ -1,6 +1,7 @@
 package com.zip_project.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,11 +22,13 @@ import com.zip_project.db.model.ModuleDefaults;
 import com.zip_project.service.costant.Costant;
 import com.zip_project.service.costant.Costant.CompleteFilePath;
 import com.zip_project.service.costant.Costant.JsonValidation;
+import com.zip_project.service.costant.Costant.testValidation;
 import com.zip_project.service.crud.ApiListService;
 import com.zip_project.service.crud.ApiModelService;
 import com.zip_project.service.crud.FileStatusService;
 import com.zip_project.service.crud.ModuleDefaultService;
-import com.zip_project.service.exception.CustomException;
+import com.zip_project.service.exception.DataParsingException;
+import com.zip_project.service.exception.DatabaseOperationException;
 
 @Service
 public class DataParseService {
@@ -44,7 +48,8 @@ public class DataParseService {
 		this.apiModelService = apiModelService;
 	}
 
-	public List<ModuleDefaults> parseJsonManager(Integer reportNumber) {
+	public void parseJsonManager(Integer reportNumber)
+			throws IOException, DataAccessException, DataParsingException {
 		// extract files associated with a specific report
 		List<ModuleDefaults> moduleDefaultsList = new ArrayList<>();
 		List<FileStatus> statusList = fileStatusService
@@ -53,82 +58,72 @@ public class DataParseService {
 		for (FileStatus fileStatus : statusList) {
 			// the non-environment file is always positioned at the start of the
 			// list
-			try {
-				if (Boolean.FALSE.equals(fileStatus.getFilePath()
-						.contains(Costant.FilePath.NOT_ENV.getValue())))
-					moduleDefaultsList.add(0, parseSingleFile(fileStatus));
-				else
-					moduleDefaultsList.add(parseSingleFile(fileStatus));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			if (Boolean.FALSE.equals(fileStatus.getFilePath()
+					.contains(Costant.FilePath.NOT_ENV.getValue())))
+				moduleDefaultsList.add(0, parseSingleFile(fileStatus));
+			else
+				moduleDefaultsList.add(parseSingleFile(fileStatus));
+
 		}
-		return moduleDefaultsList;
 	}
 
-	public ModuleDefaults parseSingleFile(FileStatus fileStatus) {
+	public ModuleDefaults parseSingleFile(FileStatus fileStatus)
+			throws IOException, DataAccessException, DataParsingException {
 		String jsonPath = null;
 		ModuleDefaults moduleDefaults = null;
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode rootNode = null;
-		try {
-			if (fileStatus != null && fileStatus.getFilePath() != null) {
-				jsonPath = fileStatus.getFilePath();
-			} else {
-				throw new CustomException(
-						"Error during json validation process", null);
-			}
-
-			// read the JSON file
-			rootNode = mapper.readTree(new File(jsonPath));
-			JsonValidation validationStatus = fileStatus
-					.getJsonValidationStatus();
-
-			// extract data from root node
-			if (validationStatus.equals(Costant.JsonValidation.VALIDATED)) {
-
-				JsonNode moduleDefaultsNode = rootNode
-						.path(Costant.RootNodePath.MODULE_DEFAULTS.getValue());
-
-				JsonValidation mdTestResult = moduleDefaultsTest(
-						moduleDefaultsNode, jsonPath, fileStatus.getRootName());
-
-				if (Objects.equals(mdTestResult,
-						Costant.JsonValidation.VALIDATED)) {
-					moduleDefaults = loadModuleDefault(jsonPath, moduleDefaults,
-							moduleDefaultsNode, fileStatus);
-
-					// iterate throw apiListNode
-					JsonNode allApiListNode = rootNode
-							.path(Costant.RootNodePath.APIS.getValue());
-
-					JsonValidation apiTestResult = apiListTest(allApiListNode);
-
-					if (apiTestResult.equals(Costant.JsonValidation.VALIDATED))
-						loadApiList(moduleDefaults, allApiListNode);
-				} else {
-					throw new Exception(
-							"Module default data not valid and didn't pass the test");
-				}
-
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (fileStatus != null && fileStatus.getFilePath() != null) {
+			jsonPath = fileStatus.getFilePath();
+		} else {
+			throw new DatabaseOperationException(
+					"An error occurred while accessing the database: file path non accessible.");
 		}
+
+		// read the JSON file
+		rootNode = mapper.readTree(new File(jsonPath));
+		JsonValidation validationStatus = fileStatus.getJsonValidationStatus();
+
+		// extract data from root node
+		if (validationStatus.equals(Costant.JsonValidation.VALIDATED)) {
+
+			JsonNode moduleDefaultsNode = rootNode
+					.path(Costant.RootNodePath.MODULE_DEFAULTS.getValue());
+
+			testValidation mdTestResult = moduleDefaultsTest(moduleDefaultsNode,
+					jsonPath, fileStatus.getRootName());
+
+			if (Objects.equals(mdTestResult,
+					Costant.testValidation.VALIDATED)) {
+				moduleDefaults = loadModuleDefault(jsonPath, moduleDefaults,
+						moduleDefaultsNode, fileStatus);
+
+				// iterate throw apiListNode
+				JsonNode allApiListNode = rootNode
+						.path(Costant.RootNodePath.APIS.getValue());
+
+				testValidation apiTestResult = apiListTest(allApiListNode);
+
+				if (apiTestResult.equals(Costant.testValidation.VALIDATED))
+					loadApiList(moduleDefaults, allApiListNode);
+			} else {
+				throw new DataParsingException(
+						"Module default data not valid, didn't pass the test");
+			}
+		}
+
 		return moduleDefaults;
 	}
 
 	private ModuleDefaults loadModuleDefault(String jsonPath,
 			ModuleDefaults moduleDefaults, JsonNode moduleDefaultsNode,
-			FileStatus fileStatus) throws Exception {
+			FileStatus fileStatus) throws DataParsingException {
+		List<ApiList> apiList = new ArrayList<>();
 
 		if (moduleDefaults == null && moduleDefaultsNode == null) {
-			throw new Exception(
+			throw new DataParsingException(
 					"Invalid parameter, moduleDefaults can't be null");
 		}
-
-		List<ApiList> apiList = new ArrayList<>();
 
 		moduleDefaults = ModuleDefaults.builder()
 				.baseUrl(moduleDefaultsNode.path(
@@ -145,20 +140,24 @@ public class DataParseService {
 						Costant.ModuleDefaultsAttributeName.PROTOCOL.getValue())
 						.asText())
 				.apiList(apiList).fileStatus(fileStatus).build();
-
-		moduleDefaultService.insertModuleDefault(moduleDefaults);
-
+		try {
+			moduleDefaultService.insertModuleDefault(moduleDefaults);
+		} catch (DataAccessException e) {
+			throw new DatabaseOperationException(
+					"An error occurred while accessing the database: "
+							+ e.getMessage());
+		}
 		return moduleDefaults;
 	}
 
 	private void loadApiList(ModuleDefaults moduleDefaults,
-			JsonNode allApiListNode) throws Exception {
+			JsonNode allApiListNode) throws DataParsingException {
 		ApiList apiList = null;
 		List<ApiModel> apiModelList = new ArrayList<>();
 		List<ApiList> apiListContainer;
 
 		if (moduleDefaults == null && allApiListNode == null) {
-			throw new Exception(
+			throw new DataParsingException(
 					"Invalid parameter, moduleDefaults can't be null");
 		}
 
@@ -178,9 +177,13 @@ public class DataParseService {
 			apiList = ApiList.builder().name(apiListKey)
 					.moduleDefaults(moduleDefaults).apiModels(apiModelList)
 					.build();
-
-			apiListService.insertApiList(apiList);
-
+			try {
+				apiListService.insertApiList(apiList);
+			} catch (DataAccessException e) {
+				throw new DatabaseOperationException(
+						"An error occurred while accessing the database: "
+								+ e.getMessage());
+			}
 			loadApiModels(apiList, singleApiListNode);
 
 			apiListContainer.add(apiList);
@@ -191,12 +194,12 @@ public class DataParseService {
 	}
 
 	private void loadApiModels(ApiList apiList, JsonNode singleApiListNode)
-			throws Exception {
+			throws DataParsingException {
 		ApiModel apiModel = null;
 		List<ApiModel> apiModelList = new ArrayList<>();
 
 		if (apiList == null || singleApiListNode == null) {
-			throw new Exception(
+			throw new DataParsingException(
 					"Invalid parameter, apiList and singleApiListNode can't be null");
 		} else if (singleApiListNode.isArray()) {
 			for (JsonNode apiModelNode : singleApiListNode) {
@@ -223,15 +226,21 @@ public class DataParseService {
 							.path(Costant.ApiModelAttribute.ISMOCKED.getValue())
 							.asBoolean());
 
-				apiModelService.insertApiModel(apiModel);
+				try {
+					apiModelService.insertApiModel(apiModel);
+				} catch (DataAccessException e) {
+					throw new DatabaseOperationException(
+							"An error occurred while accessing the database: "
+									+ e.getMessage());
+				}
 			}
 			apiModelList.add(apiModel);
 			apiList.setApiModels(apiModelList);
 		}
 	}
 
-	public JsonValidation moduleDefaultsTest(JsonNode mdjNode, String jsonPath,
-			String rootName) {
+	public testValidation moduleDefaultsTest(JsonNode mdjNode, String jsonPath,
+			String rootName) throws DataParsingException {
 		String[] moduleDefaultProtocol = Costant.getModuleDefaultProtocol();
 		String protocol = moduleDefaultProtocol[0];
 		String rootNodePath = extractVariablePath(jsonPath, rootName);
@@ -263,10 +272,13 @@ public class DataParseService {
 					&& Boolean.FALSE.equals(isProtocolMissing)
 					&& Boolean.FALSE.equals(isBaseUrlMissing)
 					&& Boolean.FALSE.equals(isSecurityMissing)) {
-				return Costant.JsonValidation.VALIDATED;
+				return Costant.testValidation.VALIDATED;
 			}
+		} else {
+			throw new DataParsingException(
+					"Incorrect parameter count in Module Defaults: ensure the number of parameters matches the expected configuration.");
 		}
-		return Costant.JsonValidation.NOT_VALIDATED;
+		return Costant.testValidation.NOT_VALIDATED;
 	}
 
 	public static String extractVariablePath(String filePath, String rootName) {
@@ -287,7 +299,7 @@ public class DataParseService {
 		return null;
 	}
 
-	public JsonValidation apiListTest(JsonNode apiListNode) {
+	public testValidation apiListTest(JsonNode apiListNode) {
 		String apiKey;
 		String[] apiListName = Costant.getApiListNames();
 		boolean isPresent;
@@ -302,9 +314,9 @@ public class DataParseService {
 			isPresent = Arrays.asList(apiListName).contains(apiKey);
 
 			if (Boolean.FALSE.equals(isPresent)) {
-				return Costant.JsonValidation.NOT_VALIDATED;
+				return Costant.testValidation.NOT_VALIDATED;
 			}
 		}
-		return Costant.JsonValidation.VALIDATED;
+		return Costant.testValidation.VALIDATED;
 	}
 }
