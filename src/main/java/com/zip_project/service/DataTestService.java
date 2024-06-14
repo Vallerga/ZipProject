@@ -14,9 +14,13 @@ import com.zip_project.db.model.FileStatus;
 import com.zip_project.service.costant.Costant;
 import com.zip_project.service.costant.Costant.TestStatus;
 import com.zip_project.service.crud.FileStatusService;
+import com.zip_project.service.crud.JsonLineListService;
 import com.zip_project.service.exception.DataParsingException;
 import com.zip_project.service.exception.DatabaseOperationException;
 import com.zip_project.service.exception.TestExecutionException;
+import com.zip_project.service.exception.error.ErrorContext;
+import com.zip_project.service.exception.error.MismatchApi;
+import com.zip_project.service.exception.error.MissingApiList;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,14 +29,18 @@ import lombok.extern.slf4j.Slf4j;
 public class DataTestService {
 
 	private final FileStatusService fileStatusService;
+	private final JsonLineListService jsonLineListService;
 
-	public DataTestService(FileStatusService fileStatusService) {
+	public DataTestService(FileStatusService fileStatusService,
+			JsonLineListService jsonLineListService) {
+
+		this.jsonLineListService = jsonLineListService;
 		this.fileStatusService = fileStatusService;
 	}
-	public List<String> dataTest(Integer reportNumber)
+	public ErrorContext dataTest(Integer reportNumber)
 			throws TestExecutionException, DataAccessException,
 			DataParsingException {
-		List<String> errorList = new ArrayList<>();
+		ErrorContext errorContext = new ErrorContext();
 		Map<String, Map<Long, List<ApiModel>>> compareNameApiListMap = new HashMap<>();
 
 		try {
@@ -43,14 +51,14 @@ public class DataTestService {
 
 			loadCompareNameApiListMap(compareNameApiListMap, allFilesMap);
 
-			sortApiListByName(compareNameApiListMap, errorList);
+			sortApiListByName(compareNameApiListMap, errorContext, statusList);
 
 			updateFileStatus(statusList, TestStatus.TESTED);
 		} catch (DataAccessException e) {
 			throw new DatabaseOperationException(
 					"An error occurred while accessing the database: file status non accessible.");
 		}
-		return errorList;
+		return errorContext;
 	}
 
 	private void updateFileStatus(List<FileStatus> statusList,
@@ -114,77 +122,135 @@ public class DataTestService {
 
 	private void sortApiListByName(
 			Map<String, Map<Long, List<ApiModel>>> compareNameApiListMap,
-			List<String> errorList) throws TestExecutionException {
+			ErrorContext errorContext, List<FileStatus> statusList)
+			throws TestExecutionException {
 		for (Map.Entry<String, Map<Long, List<ApiModel>>> compareNameApiListMapEntry : compareNameApiListMap
 				.entrySet()) {
 			String apiListName = compareNameApiListMapEntry.getKey();
 			Map<Long, List<ApiModel>> apiListByNameMap = compareNameApiListMapEntry
 					.getValue();
-			analizeApiListByName(apiListByNameMap, apiListName, errorList);
+			analizeApiListByName(apiListByNameMap, apiListName, errorContext,
+					statusList);
 		}
 	}
 
 	private void analizeApiListByName(
 			Map<Long, List<ApiModel>> apiListByNameMap, String apiListName,
-			List<String> errorList) throws TestExecutionException {
-		String error = "";
-		List<ApiModel> baseApiList = null;
+			ErrorContext errorContext, List<FileStatus> statusList)
+			throws TestExecutionException {
+		List<MissingApiList> missingApiListContainer = new ArrayList<>();
 		List<ApiModel> compareApiList = null;
-		Long baseFileNumber = null;
+		List<ApiModel> baseApiList = null;
 		Long compareFileNumber = null;
+		Long baseFileNumber = null;
+
 		for (Entry<Long, List<ApiModel>> apiListByNameMapEntry : apiListByNameMap
 				.entrySet()) {
-			baseFileNumber = apiListByNameMapEntry.getKey();
+			compareFileNumber = apiListByNameMapEntry.getKey();
+			FileStatus fileStatus = statusList
+					.get(compareFileNumber.intValue());
+
 			if (apiListByNameMapEntry.getValue() == null) {
-				error = "At file number: " + baseFileNumber
-						+ ", apiList named: " + apiListName
-						+ " not match any ApiList name. \n ";
-				errorList.add(error);
-				log.info("missing apiList: " + apiListName);
+
+				MissingApiList missingApiList = new MissingApiList();
+				missingApiList.setFileNumber(compareFileNumber);
+				missingApiList.setApiListName(apiListName);
+				missingApiList.setMessage("Not match ApiList name");
+				missingApiList.setFilePath(fileStatus.getFilePath());
+
+				missingApiListContainer.add(missingApiList);
+
+				errorContext.setMissingApiListErrors(missingApiListContainer);
 			}
 
-			if (apiListByNameMapEntry.getKey() == 1)
-				baseFileNumber = apiListByNameMapEntry.getKey();
-			else
-				compareFileNumber = apiListByNameMapEntry.getKey();
-
-			if (apiListByNameMapEntry.getKey() == 1)
-				baseApiList = apiListByNameMapEntry.getValue();
-			else
+			// load data for comparison
+			if (compareFileNumber == 1) {
 				compareApiList = apiListByNameMapEntry.getValue();
+			} else if (compareFileNumber != apiListByNameMap.size()) {
+				baseFileNumber = compareFileNumber - 1;
+				baseApiList = compareApiList;
+				compareApiList = apiListByNameMapEntry.getValue();
+			} else if (compareFileNumber == apiListByNameMap.size()) {
+				baseFileNumber = compareFileNumber - 1;
+				compareApiList = apiListByNameMapEntry.getValue();
+			}
 
-			if (compareFileNumber != null && compareApiList != null) {
-				log.info("comparing apiList: " + apiListName);
-
-				apiListComparator(apiListName, baseApiList, compareApiList,
-						baseFileNumber, compareFileNumber, errorList);
+			if (baseFileNumber != null && baseApiList != null) {
+				apiListComparator(apiListName, compareApiList, baseApiList,
+						compareFileNumber, baseFileNumber, errorContext,
+						statusList);
 			}
 		}
 	}
 
 	private void apiListComparator(String apiListName,
-			List<ApiModel> baseApiList, List<ApiModel> compareApiList,
-			Long baseFileNumber, Long compareFileNumber, List<String> errorList)
+			List<ApiModel> compareApiList, List<ApiModel> baseApiList,
+			Long compareFileNumber, Long baseFileNumber,
+			ErrorContext errorContext, List<FileStatus> statusList)
 			throws TestExecutionException {
-		Boolean result = false;
 
-		for (ApiModel baseApiModel : baseApiList) {
-			for (ApiModel compareApiModel : compareApiList) {
-				if (baseApiModel.getName().equals(compareApiModel.getName())) {
+		FileStatus baseFileStatus = statusList
+				.get(compareFileNumber.intValue());
+		FileStatus compareFileStatus = statusList
+				.get(baseFileNumber.intValue());
+
+		for (ApiModel baseApiModel : compareApiList) {
+			Boolean result = false;
+
+			for (Integer i = 0; i < baseApiList.size(); i++) {
+
+				ApiModel compareApiModel = baseApiList.get(i);
+
+				if (compareApiModel.getName().equals(baseApiModel.getName())) {
 					result = true;
 				}
-			}
 
-			if (Boolean.FALSE.equals(result)) {
-				String error = "At file number: " + baseFileNumber
-						+ ", apiList named: " + apiListName + "contain Api: "
-						+ baseApiModel.getName()
-						+ " not match any Api at file: " + compareFileNumber
-						+ " \n ";
-				errorList.add(error);
+				// if there isn't a match create error report
+				if (Boolean.TRUE.equals(result)
+						&& baseApiList.size() == i + 1) {
+
+					loadMismatchApiError(apiListName, compareFileNumber,
+							baseFileNumber, errorContext, baseFileStatus,
+							compareFileStatus, compareApiModel);
+				}
 			}
-			// reset value
-			result = false;
 		}
+	}
+	private void loadMismatchApiError(String apiListName, Long baseFileNumber,
+			Long compareFileNumber, ErrorContext errorContext,
+			FileStatus baseFileStatus, FileStatus compareFileStatus,
+			ApiModel compareApiModel) {
+		List<MismatchApi> mismatchApiContainer;
+		// TODO QUERY FOR jsonLineListService UNDONE
+		
+		// jsonLineListService.findJsonLineListById(compareFileNumber);
+		//
+		// JsonLineList baseJsonLineList = baseFileStatus.getJsonLineList();
+		//
+		// List<String> baseLineCodeList = baseJsonLineList.getLineCodeList();
+
+		// for (String line : baseLineCodeList) {
+		// log.info("EUREKA, line: ", line);
+		// }
+
+		MismatchApi mismatchApiModel = new MismatchApi();
+		mismatchApiModel.setApiName(compareApiModel.getName());
+		mismatchApiModel.setLineCode(null);
+		mismatchApiModel.setBaseFileNumber(baseFileNumber);
+		mismatchApiModel.setCompareFileNumber(compareFileNumber);
+		mismatchApiModel.setApiListName(apiListName);
+		mismatchApiModel.setMessage("Not match any Api in same apiList");
+		mismatchApiModel.setBaseFilePath(baseFileStatus.getFilePath());
+		mismatchApiModel.setCompareFilePath(compareFileStatus.getFilePath());
+
+		if (errorContext.getMismatchApiErrors() != null) {
+			mismatchApiContainer = errorContext.getMismatchApiErrors();
+		} else {
+			mismatchApiContainer = new ArrayList<>();
+		}
+
+		mismatchApiContainer.add(mismatchApiModel);
+
+		errorContext.setMismatchApiErrors(mismatchApiContainer);
 	}
 }

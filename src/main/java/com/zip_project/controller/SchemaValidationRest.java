@@ -15,6 +15,7 @@ import com.zip_project.service.SchemaValidationService;
 import com.zip_project.service.exception.DatabaseOperationException;
 import com.zip_project.service.exception.FileExtractionException;
 import com.zip_project.service.exception.SchemaValidationException;
+import com.zip_project.service.exception.error.ErrorContext;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,10 +58,10 @@ public class SchemaValidationRest {
 
 	@GetMapping("/validate")
 	@ResponseStatus(HttpStatus.OK)
-	public String validateJson(@RequestParam Integer reportNumber) {
-		String result = "";
+	public ErrorContext validateJson(@RequestParam Integer reportNumber) {
+		ErrorContext errorContext = new ErrorContext();
 		try {
-			result = jsonSchemaService.jsonValidation(reportNumber,
+			errorContext = jsonSchemaService.jsonValidation(reportNumber,
 					SCHEMA_PATH);
 		} catch (IOException e) {
 			throw new FileExtractionException(
@@ -74,8 +75,8 @@ public class SchemaValidationRest {
 					"Error while validating JSON schema: " + e.getMessage());
 		} catch (Exception e) {
 			log.info(e.getMessage());
-			return e.getMessage();
+			return errorContext;
 		}
-		return result;
+		return errorContext;
 	}
 }

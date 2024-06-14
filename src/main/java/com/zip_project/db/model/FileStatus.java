@@ -52,4 +52,9 @@ public class FileStatus {
 	@JsonManagedReference
 	@ToString.Exclude
 	private ModuleDefaults moduleDefaults;
+
+	@OneToOne(mappedBy = "fileStatus", cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
+	@JsonManagedReference
+	@ToString.Exclude
+	private JsonLineList jsonLineList;
 }

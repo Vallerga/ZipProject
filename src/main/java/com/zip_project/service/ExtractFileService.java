@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -19,6 +22,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.zip_project.db.model.FileStatus;
+import com.zip_project.db.model.JsonLineList;
 import com.zip_project.service.costant.Costant;
 import com.zip_project.service.costant.Costant.ExtractStatus;
 import com.zip_project.service.costant.Costant.JsonValidation;
@@ -67,6 +71,8 @@ public class ExtractFileService {
 			ZipInputStream zipInputStream, Path resourcePath, ZipEntry zipEntry,
 			Integer numReport, String rootName)
 			throws IOException, DataAccessException {
+
+		List<String> jsonLines = new ArrayList<>();
 		FileStatus fileStatus = null;
 		while (zipEntry != null) {
 			Path newFilePath = newFile(resourcePath, zipEntry);
@@ -86,20 +92,25 @@ public class ExtractFileService {
 
 				fileStatus = extractStatusManager(newFilePath,
 						Costant.ExtractStatus.INITIALIZED, null, numReport,
-						rootName);
+						rootName, jsonLines);
 
 				// write file content
-				try (FileOutputStream fos = new FileOutputStream(
+				StringBuilder fileContent = new StringBuilder();
+				try (FileOutputStream fileOutputStream = new FileOutputStream(
 						newFilePath.toFile())) {
-
 					int len;
 					while ((len = zipInputStream.read(zipStreamBuffer)) > 0) {
-						fos.write(zipStreamBuffer, 0, len);
+						fileOutputStream.write(zipStreamBuffer, 0, len);
+						fileContent.append(new String(zipStreamBuffer, 0, len,
+								StandardCharsets.UTF_8));
 					}
+
+					String[] lines = fileContent.toString().split("\\r?\\n");
+					jsonLines.addAll(Arrays.asList(lines));
 				}
 
 				extractStatusManager(newFilePath, Costant.ExtractStatus.CREATED,
-						fileStatus, numReport, rootName);
+						fileStatus, numReport, rootName, jsonLines);
 			}
 			zipEntry = zipInputStream.getNextEntry();
 		}
@@ -155,8 +166,10 @@ public class ExtractFileService {
 
 	public FileStatus extractStatusManager(Path filePath,
 			ExtractStatus extractStatus, FileStatus paramES, Integer numReport,
-			String rootName) throws DataAccessException {
+			String rootName, List<String> jsonLines)
+			throws DataAccessException {
 		FileStatus fileStatus = null;
+		JsonLineList jsonLineList = null;
 		Optional<FileStatus> optionalFileStatus = Optional.ofNullable(paramES);
 		Boolean paramNotNull = optionalFileStatus.isPresent();
 		List<FileStatus> esList;
@@ -165,20 +178,25 @@ public class ExtractFileService {
 			esList = fileStatusService.findByfilePath(paramES.getFilePath());
 			paramES.setIdFileStatus(esList.get(0).getIdFileStatus());
 			fileStatusService.insertFileStatus(paramES);
+
 			return fileStatus;
 		} else if (filePath != null) {
+
+			jsonLineList = JsonLineList.builder().lineCodeList(jsonLines)
+					.build();
+
 			fileStatus = FileStatus.builder()
 					.fileName(filePath.getFileName().toString())
 					.rootName(rootName).filePath(filePath.toString())
 					.reportNumber(numReport).extractStatus(extractStatus)
 					.jsonValidationStatus(JsonValidation.NOT_VALIDATED)
 					.testStatus(Costant.TestStatus.NOT_TESTED)
-					.reportStatus(Costant.ReportStatus.ABSENT).build();
-			log.debug("EXTRACT STATUS: {}", fileStatus);
+					.reportStatus(Costant.ReportStatus.ABSENT)
+					.jsonLineList(jsonLineList).build();
 
 			fileStatusService.insertFileStatus(fileStatus);
 		} else {
-			log.debug("Extract Status not created, filePath equal Null");
+			log.info("Extract Status not created, filePath equal Null");
 		}
 		return fileStatus;
 	}

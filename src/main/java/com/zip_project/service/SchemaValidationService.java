@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,8 @@ import com.zip_project.db.model.FileStatus;
 import com.zip_project.service.costant.Costant.JsonValidation;
 import com.zip_project.service.crud.FileStatusService;
 import com.zip_project.service.exception.SchemaValidationException;
+import com.zip_project.service.exception.error.ErrorContext;
+import com.zip_project.service.exception.error.ValidationSchema;
 
 import net.jimblackler.jsonschemafriend.Schema;
 import net.jimblackler.jsonschemafriend.SchemaException;
@@ -31,20 +35,23 @@ public class SchemaValidationService {
 		this.fileStatusService = fileStatusService;
 	}
 
-	public String jsonValidation(Integer reportNumber, Path schemaPath)
+	public ErrorContext jsonValidation(Integer reportNumber, Path schemaPath)
 			throws IOException, SchemaValidationException, DataAccessException {
+		ErrorContext errorContext = new ErrorContext();
+
 		// extract files associated with a specific report
 		List<FileStatus> statusList = fileStatusService
 				.findByReportNumber(reportNumber);
 
 		for (FileStatus fileStatus : statusList) {
-			validateSingleFile(schemaPath, fileStatus);
+			validateSingleFile(schemaPath, fileStatus, errorContext);
 
 		}
-		return reportNumber.toString();
+		return errorContext;
 	}
 
-	public void validateSingleFile(Path schemaPath, FileStatus fileStatus)
+	public void validateSingleFile(Path schemaPath, FileStatus fileStatus,
+			ErrorContext errorContext)
 			throws IOException, SchemaValidationException, DataAccessException {
 		String jsonPath = null;
 
@@ -79,7 +86,11 @@ public class SchemaValidationService {
 		} catch (SchemaException e) {
 			fileStatus.setJsonValidationStatus(JsonValidation.NOT_VALIDATED);
 			fileStatusService.updateFileStatus(fileStatus);
-			throw new SchemaValidationException(e.getMessage());
+
+			errorContext.setValidationSchemaErrors(parseErrorMessage(
+					e.getMessage(), fileStatus, errorContext));
+
+			// throw new SchemaValidationException(e.getMessage());
 		} catch (IOException e) {
 			fileStatus.setJsonValidationStatus(JsonValidation.NOT_VALIDATED);
 			fileStatusService.updateFileStatus(fileStatus);
@@ -124,5 +135,30 @@ public class SchemaValidationService {
 		} catch (IOException e) {
 			throw new IOException(e.getMessage());
 		}
+	}
+
+	private List<ValidationSchema> parseErrorMessage(String errorMessage,
+			FileStatus fileStatus, ErrorContext errorContext) {
+		List<ValidationSchema> schemaValidationContainer;
+		if (errorContext.getMismatchApiErrors() != null) {
+			schemaValidationContainer = errorContext
+					.getValidationSchemaErrors();
+		} else {
+			schemaValidationContainer = new ArrayList<>();
+		}
+
+		List<String> errorList = new ArrayList<>(
+				Arrays.asList(errorMessage.split("\\r\\n")));
+
+		for (String singleError : errorList) {
+			ValidationSchema validationSchema = new ValidationSchema();
+			validationSchema.setMessage(singleError);
+			validationSchema.setFilePath(fileStatus.getFilePath());
+
+			schemaValidationContainer.add(validationSchema);
+		}
+
+		errorContext.setValidationSchemaErrors(schemaValidationContainer);
+		return schemaValidationContainer;
 	}
 }

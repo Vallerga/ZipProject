@@ -1,8 +1,6 @@
 package com.zip_project.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -17,6 +15,7 @@ import com.zip_project.service.DataTestService;
 import com.zip_project.service.exception.DataParsingException;
 import com.zip_project.service.exception.DatabaseOperationException;
 import com.zip_project.service.exception.TestExecutionException;
+import com.zip_project.service.exception.error.ErrorContext;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,10 +60,10 @@ public class DataParseRest {
 
 	@GetMapping("/datatest")
 	@ResponseStatus(HttpStatus.OK)
-	public List<String> dataTest(@RequestParam Integer reportNumber) {
-		List<String> errorList = new ArrayList<>();
+	public ErrorContext dataTest(@RequestParam Integer reportNumber) {
+		ErrorContext errorContext = new ErrorContext();
 		try {
-			errorList = dataTestService.dataTest(reportNumber);
+			errorContext = dataTestService.dataTest(reportNumber);
 		} catch (TestExecutionException e) {
 			log.info(e.getMessage());
 			throw new TestExecutionException(
@@ -79,6 +78,6 @@ public class DataParseRest {
 		} catch (Exception e) {
 			log.info(e.getMessage());
 		}
-		return errorList;
+		return errorContext;
 	}
 }
