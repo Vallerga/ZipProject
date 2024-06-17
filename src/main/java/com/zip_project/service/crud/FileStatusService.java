@@ -68,11 +68,11 @@ public class FileStatusService {
 			Integer reportNumber) {
 		Map<Long, Map<String, List<ApiModel>>> allFilesApiModelsMap = new HashMap<>();
 
-		List<FileStatus> fileStatuses = fileStatusDao
+		List<FileStatus> fileStatusByReportNumber = fileStatusDao
 				.findByReportNumber(reportNumber);
 
-		for (FileStatus fileStatus : fileStatuses) {
-			ModuleDefaults moduleDefaults = fileStatus.getModuleDefaults();
+		for (FileStatus singleFileStatus : fileStatusByReportNumber) {
+			ModuleDefaults moduleDefaults = singleFileStatus.getModuleDefaults();
 
 			// initialize a new map for each file
 			if (moduleDefaults != null) {

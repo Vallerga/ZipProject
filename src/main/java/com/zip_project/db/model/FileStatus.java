@@ -48,12 +48,12 @@ public class FileStatus {
 
 	private ReportStatus reportStatus;
 
-	@OneToOne(mappedBy = "fileStatus", cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
+	@OneToOne(mappedBy = "fileStatus", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JsonManagedReference
 	@ToString.Exclude
 	private ModuleDefaults moduleDefaults;
 
-	@OneToOne(mappedBy = "fileStatus", cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = false)
+	@OneToOne(mappedBy = "fileStatus", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JsonManagedReference
 	@ToString.Exclude
 	private JsonLineList jsonLineList;

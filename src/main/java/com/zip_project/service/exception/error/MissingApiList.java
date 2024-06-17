@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MissingApiList {
+	private String missingApiListName;
 	private Long fileNumber;
-	private String apiListName;
 	private String message;
 	private String filePath;
 }

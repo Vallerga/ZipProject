@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.zip_project.db.model.ApiModel;
 import com.zip_project.db.model.FileStatus;
+import com.zip_project.db.model.JsonLineList;
 import com.zip_project.service.costant.Costant;
 import com.zip_project.service.costant.Costant.TestStatus;
 import com.zip_project.service.crud.FileStatusService;
@@ -22,9 +23,6 @@ import com.zip_project.service.exception.error.ErrorContext;
 import com.zip_project.service.exception.error.MismatchApi;
 import com.zip_project.service.exception.error.MissingApiList;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Service
 public class DataTestService {
 
@@ -153,8 +151,8 @@ public class DataTestService {
 			if (apiListByNameMapEntry.getValue() == null) {
 
 				MissingApiList missingApiList = new MissingApiList();
+				missingApiList.setMissingApiListName(apiListName);
 				missingApiList.setFileNumber(compareFileNumber);
-				missingApiList.setApiListName(apiListName);
 				missingApiList.setMessage("Not match ApiList name");
 				missingApiList.setFilePath(fileStatus.getFilePath());
 
@@ -206,7 +204,7 @@ public class DataTestService {
 				}
 
 				// if there isn't a match create error report
-				if (Boolean.TRUE.equals(result)
+				if (Boolean.FALSE.equals(result)
 						&& baseApiList.size() == i + 1) {
 
 					loadMismatchApiError(apiListName, compareFileNumber,
@@ -220,22 +218,15 @@ public class DataTestService {
 			Long compareFileNumber, ErrorContext errorContext,
 			FileStatus baseFileStatus, FileStatus compareFileStatus,
 			ApiModel compareApiModel) {
-		List<MismatchApi> mismatchApiContainer;
-		// TODO QUERY FOR jsonLineListService UNDONE
-		
-		// jsonLineListService.findJsonLineListById(compareFileNumber);
-		//
-		// JsonLineList baseJsonLineList = baseFileStatus.getJsonLineList();
-		//
-		// List<String> baseLineCodeList = baseJsonLineList.getLineCodeList();
 
-		// for (String line : baseLineCodeList) {
-		// log.info("EUREKA, line: ", line);
-		// }
+		List<MismatchApi> mismatchApiContainer;
+
+		Integer mismatchLine = findMismatchLine(compareApiModel.getName(),
+				compareFileNumber, baseFileStatus);
 
 		MismatchApi mismatchApiModel = new MismatchApi();
 		mismatchApiModel.setApiName(compareApiModel.getName());
-		mismatchApiModel.setLineCode(null);
+		mismatchApiModel.setLineCode(mismatchLine);
 		mismatchApiModel.setBaseFileNumber(baseFileNumber);
 		mismatchApiModel.setCompareFileNumber(compareFileNumber);
 		mismatchApiModel.setApiListName(apiListName);
@@ -253,4 +244,24 @@ public class DataTestService {
 
 		errorContext.setMismatchApiErrors(mismatchApiContainer);
 	}
+	private Integer findMismatchLine(String apiName, Long compareFileNumber,
+			FileStatus baseFileStatus) {
+		JsonLineList compareJsonLineList = jsonLineListService
+				.getJsonLineListByModuleDefaultsId(compareFileNumber);
+
+		jsonLineListService.findJsonLineListById(compareFileNumber);
+
+		baseFileStatus.getJsonLineList();
+
+		List<String> compareLineCodeList = compareJsonLineList
+				.getLineCodeList();
+
+		for (Integer i = 0; i < compareLineCodeList.size(); i++) {
+			String line = compareLineCodeList.get(i);
+			if (line.contains(apiName))
+				return i + 1;
+		}
+		return null;
+	}
+
 }

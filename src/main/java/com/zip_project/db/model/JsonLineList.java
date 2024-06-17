@@ -2,6 +2,9 @@ package com.zip_project.db.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @Builder
@@ -26,9 +30,12 @@ public class JsonLineList {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idJsonLineList;
 	
+	@JsonIgnore
+	@ToString.Exclude
 	private List<String> lineCodeList;
 	
 	@OneToOne
     @JoinColumn(name = "idFileStatus")
+	@JsonBackReference
     private FileStatus fileStatus;
 }

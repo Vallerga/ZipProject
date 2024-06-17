@@ -111,6 +111,7 @@ public class ExtractFileService {
 
 				extractStatusManager(newFilePath, Costant.ExtractStatus.CREATED,
 						fileStatus, numReport, rootName, jsonLines);
+				jsonLines = new ArrayList<>();
 			}
 			zipEntry = zipInputStream.getNextEntry();
 		}
@@ -193,6 +194,8 @@ public class ExtractFileService {
 					.testStatus(Costant.TestStatus.NOT_TESTED)
 					.reportStatus(Costant.ReportStatus.ABSENT)
 					.jsonLineList(jsonLineList).build();
+
+			jsonLineList.setFileStatus(fileStatus);
 
 			fileStatusService.insertFileStatus(fileStatus);
 		} else {
