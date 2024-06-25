@@ -139,7 +139,9 @@ public class SchemaValidationService {
 
 	private List<ValidationSchema> parseErrorMessage(String errorMessage,
 			FileStatus fileStatus, ErrorContext errorContext) {
+		TextContentRead errorParser = new TextContentRead();
 		List<ValidationSchema> schemaValidationContainer;
+
 		if (errorContext.getMismatchApiErrors() != null) {
 			schemaValidationContainer = errorContext
 					.getValidationSchemaErrors();
@@ -152,7 +154,8 @@ public class SchemaValidationService {
 
 		for (String singleError : errorList) {
 			ValidationSchema validationSchema = new ValidationSchema();
-			validationSchema.setMessage(singleError);
+			validationSchema = errorParser.readTextContent(singleError,
+					validationSchema);
 			validationSchema.setFilePath(fileStatus.getFilePath());
 
 			schemaValidationContainer.add(validationSchema);

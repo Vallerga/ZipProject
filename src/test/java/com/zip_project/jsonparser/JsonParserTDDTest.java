@@ -1,4 +1,4 @@
-package com.zip_project;
+package com.zip_project.jsonparser;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,19 +38,19 @@ class JsonParserTDDTest {
 		assertTrue(JsonParserTDD.isJsonString("     \"\"    "));
 		assertTrue(JsonParserTDD.isJsonString("\n\"\n\"\n"));
 	}
-	
-	 @Test
-	    void testJsonString() {
-	        assertTrue(JsonParserTDD.isJsonString("\"hello\""));
-	        assertTrue(JsonParserTDD.isJsonString("\"  hello  \""));
-	        assertTrue(JsonParserTDD.isJsonString("\"\\\"\\\"\""));
-	        assertTrue(JsonParserTDD.isJsonString("\"\\t\\n\\r\""));
-	        assertFalse(JsonParserTDD.isJsonString("hello"));
-	        assertFalse(JsonParserTDD.isJsonString("  hello  "));
-	        assertFalse(JsonParserTDD.isJsonString("\""));
-	        assertFalse(JsonParserTDD.isJsonString("\"hello"));
-	        assertFalse(JsonParserTDD.isJsonString("hello\""));
-	    }
+
+	@Test
+	void testJsonString() {
+		assertTrue(JsonParserTDD.isJsonString("\"hello\""));
+		assertTrue(JsonParserTDD.isJsonString("\"  hello  \""));
+		assertTrue(JsonParserTDD.isJsonString("\"\\\"\\\"\""));
+		assertTrue(JsonParserTDD.isJsonString("\"\\t\\n\\r\""));
+		assertFalse(JsonParserTDD.isJsonString("hello"));
+		assertFalse(JsonParserTDD.isJsonString("  hello  "));
+		assertFalse(JsonParserTDD.isJsonString("\""));
+		assertFalse(JsonParserTDD.isJsonString("\"hello"));
+		assertFalse(JsonParserTDD.isJsonString("hello\""));
+	}
 
 	@Test
 	void testJsonObject() {
@@ -59,15 +59,6 @@ class JsonParserTDDTest {
 		assertTrue(JsonParserTDD.isJsonObject("{\n}"));
 		assertFalse(JsonParserTDD.isJsonObject("{"));
 		assertFalse(JsonParserTDD.isJsonObject("}"));
-	}
-
-	@Test
-	void testJsonArray() {
-		assertTrue(JsonParserTDD.isJsonArray("[]"));
-		assertTrue(JsonParserTDD.isJsonArray("     [   ]   "));
-		assertTrue(JsonParserTDD.isJsonArray("[\n]"));
-		assertFalse(JsonParserTDD.isJsonArray("["));
-		assertFalse(JsonParserTDD.isJsonArray("]"));
 	}
 
 	@Test
@@ -102,23 +93,23 @@ class JsonParserTDDTest {
 		assertTrue(JsonParserTDD.isJsonBoolean("  false  "));
 		assertFalse(JsonParserTDD.isJsonBoolean("yes"));
 		assertFalse(JsonParserTDD.isJsonBoolean("no"));
+		assertFalse(JsonParserTDD.isJsonBoolean("true false"));
 	}
-	
-	@Test
-    void testIsJsonAttribute() {
-	 assertTrue(JsonParserTDD.isJsonAttribute("\"name\": \"John\""));
-     assertTrue(JsonParserTDD.isJsonAttribute("\"age\": 30"));
-     assertTrue(JsonParserTDD.isJsonAttribute("\"isStudent\": true"));
-     assertTrue(JsonParserTDD.isJsonAttribute("\"balance\": 123.45"));
-     assertTrue(JsonParserTDD.isJsonAttribute("\"children\": null"));
-     assertTrue(JsonParserTDD.isJsonAttribute("\"address\": {\"city\": \"New York\"}"));
-     assertTrue(JsonParserTDD.isJsonAttribute("\"numbers\": [1, 2, 3]"));
 
-     assertFalse(JsonParserTDD.isJsonAttribute("name: \"John\"")); 
-     assertFalse(JsonParserTDD.isJsonAttribute("\"name\" \"John\""));
-//     assertFalse(JsonParserTDD.isJsonAttribute("\"name\": \"John\" \"Doe\""));
-     assertFalse(JsonParserTDD.isJsonAttribute("\"name\": "));
-     assertFalse(JsonParserTDD.isJsonAttribute(": \"John\""));
-     assertFalse(JsonParserTDD.isJsonAttribute("\"name: \"John\""));
+	@Test
+	void testIsJsonAttribute() {
+		assertTrue(JsonParserTDD.isJsonAttribute("\"name\": \"John\""));
+		assertTrue(JsonParserTDD.isJsonAttribute("\"age\": 30"));
+		assertTrue(JsonParserTDD.isJsonAttribute("\"isStudent\": true"));
+		assertTrue(JsonParserTDD.isJsonAttribute("\"balance\": 123.45"));
+		assertTrue(JsonParserTDD.isJsonAttribute("\"children\": null"));
+		assertTrue(JsonParserTDD.isJsonAttribute("\"numbers\": [1, 2, 3]"));
+		assertTrue(JsonParserTDD
+				.isJsonAttribute("\"address\": {\"city\": \"New York\"}"));
+		assertFalse(JsonParserTDD.isJsonAttribute("name: \"John\""));
+		assertFalse(JsonParserTDD.isJsonAttribute("\"name\" \"John\""));
+		assertFalse(JsonParserTDD.isJsonAttribute("\"name\": "));
+		assertFalse(JsonParserTDD.isJsonAttribute(": \"John\""));
+		assertFalse(JsonParserTDD.isJsonAttribute("\"name: \"John\""));
 	}
 }

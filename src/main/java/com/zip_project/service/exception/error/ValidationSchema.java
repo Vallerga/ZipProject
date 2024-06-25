@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ValidationSchema {
-	private String message;
+	private String context;
+	String errorPosition;
+	String expectedStructure;
+	String problemDescription;
 	private String filePath;
 }

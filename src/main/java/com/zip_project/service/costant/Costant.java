@@ -64,21 +64,21 @@ public class Costant {
 			return value;
 		}
 	}
-	
+
 	// test validation
-		public enum testValidation {
-			VALIDATED("validated"), NOT_VALIDATED("not_validated");
+	public enum testValidation {
+		VALIDATED("validated"), NOT_VALIDATED("not_validated");
 
-			private final String value;
+		private final String value;
 
-			testValidation(String value) {
-				this.value = value;
-			}
-
-			public String getValue() {
-				return value;
-			}
+		testValidation(String value) {
+			this.value = value;
 		}
+
+		public String getValue() {
+			return value;
+		}
+	}
 
 	// attribute number accepted
 	public static final Integer ROOTNODE_ATTRIBUTE = 2;
@@ -207,6 +207,21 @@ public class Costant {
 		private final String value;
 
 		CompleteFilePath(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return value;
+		}
+	}
+
+	public enum ErrorParser {
+		REMOVING_TAG("Validation errors:"), AT_TAG(" at "), FAILED_TAG(
+				" failed "), WITH_TAG(" with ");
+
+		private final String value;
+
+		ErrorParser(String value) {
 			this.value = value;
 		}
 

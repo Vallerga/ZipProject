@@ -21,7 +21,7 @@ public class ReportService {
 	public void compileReport(Integer reportNumber) {
 		List<FileStatus> statusList = fileStatusService
 				.findByReportNumber(reportNumber);
-		for(FileStatus fileStatus : statusList) {
+		for (FileStatus fileStatus : statusList) {
 			fileStatus.setReportStatus(Costant.ReportStatus.COMPLETED);
 			fileStatusService.updateFileStatus(fileStatus);
 		}
